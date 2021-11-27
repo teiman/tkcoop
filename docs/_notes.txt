@@ -1,0 +1,22 @@
+
+
+
+
+Launch a laser
+
+LaunchLaser(org, self.enemy.origin - self.origin);
+
+
+Wizard shot with this
+void(entity missile, float mspeed, float accuracy) LaunchMissile =
+
+
+
+
+
+
+
+
+
+
+

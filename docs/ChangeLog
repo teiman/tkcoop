@@ -1,0 +1,378 @@
+2007-05-12 07:16  hexum
+
+	* client.qc, weapons.qc: remove skillup/down
+
+2007-05-12 06:09  hexum
+
+	* items.qc: make powerups respawn
+
+2007-05-12 06:09  hexum
+
+	* client.qc, items.qc: make powerups glow
+
+2007-05-10 10:16  hexum
+
+	* client.qc, defs.qc, exutil.qc, items.qc, weapons.qc: newgame
+	  works now
+
+2007-05-10 09:24  hexum
+
+	* items.qc: remove useless else statement
+
+2007-05-10 09:18  hexum
+
+	* combat.qc: modifications to ai
+
+2007-05-10 09:08  hexum
+
+	* boss.qc: fix chthon's aim
+
+2007-05-10 04:09  goq
+
+	* items.qc: Fixed armormessage bug, should only print when the AI
+	  took the armor FOR REAL
+
+2007-05-10 03:38  hexum
+
+	* client.qc, combat.qc, defs.qc, exutil.qc, oldone.qc: remove
+	  finalfrags
+
+2007-05-10 03:20  goq
+
+	* client.qc: Changed mod's url in motd
+
+2007-05-10 03:20  hexum
+
+	* exutil.qc: fix a typo
+
+2007-05-10 03:19  hexum
+
+	* admin.qc, exutil.qc: add cmd admin
+
+2007-05-10 03:05  goq
+
+	* items.qc: Fixed items so that no longer any kind of entity can
+	  take it, only players and monsters
+
+2007-05-10 02:20  goq
+
+	* items.qc: Monsters now take armors, fixed related server crash
+	  bug
+
+2007-05-10 02:11  goq
+
+	* defs.qc, exutil.qc, items.qc: Armor taking for monsters, code
+
+2007-05-10 02:07  hexum
+
+	* defs.qc, exutil.qc: changed voting system
+
+2007-05-10 01:30  goq
+
+	* boss.qc: Added superaim for Chthton
+
+2007-05-10 01:22  goq
+
+	* boss.qc: Additional boss.qc tweaks
+
+2007-05-10 01:10  goq
+
+	* boss.qc: Changed boss to shoot faster lavaballs
+
+2007-05-10 00:50  goq
+
+	* triggers.qc: Revamped skill teleporters
+
+2007-05-10 00:38  hexum
+
+	* client.qc, exutil.qc, weapons.qc: add new cmd mechanism and fix
+	  ShowStatus
+
+2007-05-09 23:35  hexum
+
+	* client.qc, combat.qc: some bugfixes, and fix scores display
+
+2007-05-09 22:42  hexum
+
+	* exutil.qc: add vote alert sounds
+
+2007-05-09 10:53  hexum
+
+	* defs.qc, exutil.qc: add timeout to votes
+
+2007-05-09 10:39  hexum
+
+	* exutil.qc: add bug check code
+
+2007-05-09 10:37  hexum
+
+	* defs.qc, exutil.qc: one player, one vote - fix voting system
+
+2007-05-09 10:19  hexum
+
+	* changelog.txt: work on changelog
+
+2007-05-09 10:06  hexum
+
+	* exutil.qc: fix ShowScores bug
+
+2007-05-09 10:05  hexum
+
+	* client.qc: fix empty server reset code
+
+2007-05-09 09:53  hexum
+
+	* defs.qc: add centerprint 5
+
+2007-05-09 09:52  goq
+
+	* exutil.qc: [no log message]
+
+2007-05-09 09:50  hexum
+
+	* client.qc: fix server reset code
+
+2007-05-09 09:49  goq
+
+	* exutil.qc: Additional functionality for ShowNick (experimental)
+
+2007-05-09 09:36  hexum
+
+	* client.qc, defs.qc, exutil.qc, weapons.qc: implement voting
+
+2007-05-09 09:05  hexum
+
+	* exutil.qc: remove useless plcount from ShowScores
+
+2007-05-09 08:56  hexum
+
+	* client.qc: fix reset empty server code
+
+2007-05-09 08:12  hexum
+
+	* items.qc: make armor respawn too
+
+2007-05-09 08:11  hexum
+
+	* items.qc: make health respawn too
+
+2007-05-09 08:00  hexum
+
+	* exutil.qc: another change to ShowStatus
+
+2007-05-09 07:58  hexum
+
+	* exutil.qc: typo
+
+2007-05-09 07:58  hexum
+
+	* exutil.qc: minor change to ShowStatus, show true health
+	  multiplier (it is set at level start)
+
+2007-05-09 07:47  hexum
+
+	* exutil.qc, weapons.qc: implement shownick
+
+2007-05-09 07:09  goq
+
+	* exutil.qc: Fixed a newline mistake in ShowStatus
+
+2007-05-09 07:02  hexum
+
+	* exutil.qc: ok it compiles now
+
+2007-05-09 06:59  hexum
+
+	* exutil.qc: some more cleanups
+
+2007-05-09 06:57  hexum
+
+	* client.qc, exutil.qc: fix teamkiller kick code + exutil fixups
+
+2007-05-09 06:52  goq
+
+	* exutil.qc: Latest update for commands
+
+2007-05-09 06:48  goq
+
+	* exutil.qc: Added some new commands
+
+2007-05-09 06:47  hexum
+
+	* weapons.qc: some more fixups
+
+2007-05-09 06:46  hexum
+
+	* exutil.qc: some fixups
+
+2007-05-09 06:45  hexum
+
+	* client.qc, exutil.qc: change coop_kick_teamkillers code
+
+2007-05-09 06:17  goq
+
+	* exutil.qc: New commands again.
+
+2007-05-09 06:13  hexum
+
+	* client.qc, exutil.qc: change PlayersOnline to coop_players_online
+
+2007-05-09 06:11  goq
+
+	* client.qc, exutil.qc, weapons.qc: Added some new commands
+
+2007-05-09 05:36  hexum
+
+	* client.qc, defs.qc, exutil.qc: health multiplier
+
+2007-05-09 04:15  goq
+
+	* client.qc, defs.qc, exutil.qc: Fixed health multiplication, added
+	  global variable to store playerCount
+
+2007-05-09 03:50  hexum
+
+	* items.qc: make ammo respawn in coop
+
+2007-05-08 12:51  hexum
+
+	* combat.qc: potential fix for monster enemy code, needs testing
+
+2007-05-08 12:51  hexum
+
+	* exutil.qc: fix an error
+
+2007-05-08 12:04  hexum
+
+	* exutil.qc: health should only increase when players > 1
+
+2007-05-08 11:34  hexum
+
+	* exutil.qc: some minor fixes
+
+2007-05-08 11:20  hexum
+
+	* ai.qc, client.qc, combat.qc, defs.qc, exutil.qc, fight.qc,
+	  knight.qc, misc.qc, monsters.qc, ogre.qc, oldone.qc, subs.qc,
+	  weapons.qc, wizard.qc: fix most compiler warnings
+
+2007-05-08 09:42  goq
+
+	* exutil.qc: Fixed bugs in exutil.qc for compiler
+
+2007-05-08 09:40  goq
+
+	* exutil.qc: Fixed function order
+
+2007-05-08 09:28  hexum
+
+	* client.qc, exutil.qc: fix a few typos/errors
+
+2007-05-08 09:26  goq
+
+	* exutil.qc: Upload
+
+2007-05-08 09:22  goq
+
+	* buttons.qc, demon.qc, dog.qc, doors.qc, enforcer.qc, files.dat,
+	  fish.qc, hknight.qc, items.qc, knight.qc, misc.qc, models.qc,
+	  ogre.qc, plats.qc, player.qc, progs.src, q_defs.qc, q_subs.qc,
+	  qwprogs.src, server.qc, shalrath.qc, shambler.qc, soldier.qc,
+	  spectate.qc, sprites.qc, subs.qc, tarbaby.qc, triggers.qc,
+	  weapons.qc, wizard.qc, world.qc: Added health multiplication code
+	  to monsters Introduced new exutil.qc for exCoop specific
+	  functions
+
+2004-08-19 07:38  goq
+
+	* arena.qc: [no log message]
+
+2004-08-18 15:02  hexum
+
+	* client.qc, error.log, oldone.qc: err... i forget? something to do
+	  with the kick command I imagine... lol :(
+
+2004-08-18 06:16  goq
+
+	* client.qc: [no log message]
+
+2004-08-16 20:57  goq
+
+	* changelog.txt, coop.cfg, readme.txt: [no log message]
+
+2004-08-16 08:58  hexum
+
+	* admin.qc: add stuffcmd 'users' if kick setinfo is not set
+
+2004-08-16 08:45  hexum
+
+	* client.qc, error.log, triggers.qc, weapons.qc: make skill a
+	  kteams-style command
+
+2004-08-16 07:45  hexum
+
+	* admin.qc, client.qc, error.log, weapons.qc: add admin kick
+	  command
+
+2004-08-16 06:29  goq
+
+	* oldone.qc: [no log message]
+
+2004-08-16 05:51  hexum
+
+	* client.qc, error.log, oldone.qc: fixup frag totals
+
+2004-08-16 05:18  hexum
+
+	* client.qc, defs.qc: [no log message]
+
+2004-08-16 05:14  goq
+
+	* client.qc, defs.qc, error.log, oldone.qc: [no log message]
+
+2004-08-16 05:09  goq
+
+	* error.log, oldone.qc: [no log message]
+
+2004-08-16 05:06  hexum
+
+	* admin.qc, client.qc, error.log, progs.src, qwprogs.src,
+	  weapons.qc: preliminary admin support
+
+2004-08-16 04:56  hexum
+
+	* defs.qc: add bprintX functions, also some admin related fields
+
+2004-08-15 14:27  hexum
+
+	* client.qc, weapons.qc: move impulses to weapons.qc
+	  (ImpulseCommand)
+
+2004-08-13 13:48  goq
+
+	* shambler.qc: [no log message]
+
+2004-08-11 12:00  hexum
+
+	* ai.qc, boss.qc, buttons.qc, changelog.txt, client.qc, combat.qc,
+	  coop.cfg, defs.qc, demon.qc, dog.qc, doors.qc, enforcer.qc,
+	  error.log, fight.qc, files.dat, fish.qc, flag.qc, hknight.qc,
+	  items.qc, knight.qc, misc.qc, models.qc, monsters.qc, ogre.qc,
+	  oldone.qc, plats.qc, player.qc, progdefs.h, progs.src, q_defs.qc,
+	  q_subs.qc, qwprogs.src, readme.txt, server.qc, shalrath.qc,
+	  shambler.qc, soldier.qc, spectate.qc, sprites.qc, subs.qc,
+	  tarbaby.qc, triggers.qc, weapons.qc, wizard.qc, world.qc,
+	  zombie.qc: Initial revision
+
+2004-08-11 12:00  hexum
+
+	* ai.qc, boss.qc, buttons.qc, changelog.txt, client.qc, combat.qc,
+	  coop.cfg, defs.qc, demon.qc, dog.qc, doors.qc, enforcer.qc,
+	  error.log, fight.qc, files.dat, fish.qc, flag.qc, hknight.qc,
+	  items.qc, knight.qc, misc.qc, models.qc, monsters.qc, ogre.qc,
+	  oldone.qc, plats.qc, player.qc, progdefs.h, progs.src, q_defs.qc,
+	  q_subs.qc, qwprogs.src, readme.txt, server.qc, shalrath.qc,
+	  shambler.qc, soldier.qc, spectate.qc, sprites.qc, subs.qc,
+	  tarbaby.qc, triggers.qc, weapons.qc, wizard.qc, world.qc,
+	  zombie.qc: initial check in
+

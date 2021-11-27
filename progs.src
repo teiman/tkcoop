@@ -1,0 +1,42 @@
+E:\quake\qw\spprogs.dat
+
+00_defs.qc
+00_precache.qc
+00_protocol.qc
+00_world.qc
+01_admin.qc
+01_subs.qc
+
+fight.qc	// single
+ai.qc		// single
+combat.qc
+items.qc
+exutil.qc
+weapons.qc
+//world was here
+client.qc
+spectate.qc
+player.qc
+doors.qc
+buttons.qc
+triggers.qc
+plats.qc
+misc.qc
+
+// single:
+monsters.qc
+ogre.qc
+demon.qc
+shambler.qc
+knight.qc
+soldier.qc
+wizard.qc
+dog.qc
+zombie.qc
+boss.qc
+tarbaby.qc		// registered
+hknight.qc		// registered
+fish.qc			// registered
+shalrath.qc		// registered
+enforcer.qc		// registered
+oldone.qc		// registered
