@@ -158,19 +158,9 @@ void() zombie_walk19	=[	$walk19,	zombie_walk1	] {
 			sound (self, CHAN_VOICE, "zombie/z_gib.wav", 1, ATTN_NORM);
 
 			self.takedamage = DAMAGE_NO;
-			T_RadiusDamage (self, self, 40, world, "monster_zombie");
-			
+			T_RadiusDamage (self, self, 40, world, "monster_zombie");			
 
-			WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
-			WriteByte (MSG_BROADCAST, TE_TAREXPLOSION);
-			WriteCoord (MSG_BROADCAST, self.origin_x);
-			WriteCoord (MSG_BROADCAST, self.origin_y);
-			WriteCoord (MSG_BROADCAST, self.origin_z);
-			multicast (self.origin, MULTICAST_PHS);	
-			
-			//self.think = zombie_die;
-			//self.nextthink = time + 0.1;
-
+			TAREXPLOSION(self.origin);
 			remove (self);
 		}
 };
@@ -497,6 +487,12 @@ void() zombie_die =
 	ThrowGib ("progs/gib1.mdl", self.health);
 	ThrowGib ("progs/gib2.mdl", self.health);
 	ThrowGib ("progs/gib3.mdl", self.health);
+
+	if(0){//Tei cool, but I don't know if fit the gameplay, maybe if they are traps?
+		ThrowGib ("progs/w_spike.mdl", self.health);
+		ThrowGib ("progs/w_spike.mdl", self.health);
+		ThrowGib ("progs/w_spike.mdl", self.health);
+	}
 };
 
 
@@ -521,15 +517,6 @@ void() zombie_byte =
 		
 	ldmg = (random() + random() + random()) * 8;
 	T_Damage (self.enemy, self, self, ldmg);
-
-	/*
-	sound (self, CHAN_VOICE, "zombie/z_gib.wav", 1, ATTN_NORM);
-	ThrowHead ("progs/h_zombie.mdl", self.health);
-	ThrowGib ("progs/gib1.mdl", self.health);
-	ThrowGib ("progs/gib2.mdl", self.health);
-	ThrowGib ("progs/gib3.mdl", self.health);	
-	*/
-	//self.health = -10;
 };
 
 
@@ -619,6 +606,7 @@ void() monster_zombie =
 	precache_model ("progs/zombie.mdl");
 	precache_model ("progs/h_zombie.mdl");
 	precache_model ("progs/zom_gib.mdl");
+	precache_model ("progs/w_spike.mdl");	
 
 	precache_sound ("zombie/z_idle.wav");
 	precache_sound ("zombie/z_idle1.wav");

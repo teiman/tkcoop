@@ -37,6 +37,7 @@ void()monster_zombie;
 void()monster_enforcer;
 void()monster_shambler;
 void()monster_dog;
+void()monster_army;
 
 /*QUAKED light (0 1 0) (-8 -8 -8) (8 8 8) START_OFF
 Non-displayed light.
@@ -44,31 +45,26 @@ Default light value is 300
 Default style is 0
 If targeted, it will toggle between on or off.
 */
-void() light =
-{
-	
+void() light = {	
+	local float t, best, best_angle;
+	local vector end;
 
-	if (!self.targetname)
-	{       // inert light
-		//remove(self);
+	if (!self.targetname){       // inert light
+		local float spawned = DynamicSpawnHere();
 
-		//monster_zombie();
-		//monster_enforcer();
-		//monster_shambler();
-		monster_dog();
+		if(!spawned){
+			remove(self);
+		}
 		return;
 	}
 	
-	if (self.style >= 32)
-	{
+	if (self.style >= 32){
 		self.use = light_use;
 		if (self.spawnflags & START_OFF)
 			lightstyle(self.style, "a");
 		else
 			lightstyle(self.style, "m");
 	}
-
-	//monster_zombie();
 };
 
 /*QUAKED light_fluoro (0 1 0) (-8 -8 -8) (8 8 8) START_OFF

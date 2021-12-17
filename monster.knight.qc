@@ -266,6 +266,8 @@ void() monster_knight =
 	self.th_melee = knight_atk1;
 	self.th_pain = knight_pain;
 	self.th_die = knight_die;
+
+	self.armorvalue = 100;
 	
 	walkmonster_start ();
 };

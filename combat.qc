@@ -102,35 +102,35 @@ The damage is coming from inflictor, but get mad at attacker
 This should be the only function that ever reduces health.
 ============
 */
-void(entity targ, entity inflictor, entity attacker, float damage) T_Damage=
-{
+void(entity targ, entity inflictor, entity attacker, float damage) T_Damage = {
 	local   vector  dir;
 	local   entity  oldself;
 	local   float   save;
 	local   float   take;
-	local   string  s;
 	local   string  attackerteam, targteam;
-
 
 	if (!targ.takedamage)
 		return;
 
-// used by buttons and triggers to set activator for target firing
+	// used by buttons and triggers to set activator for target firing
 	damage_attacker = attacker;
 
 
-// check for quad damage powerup on the attacker
-	if (attacker.super_damage_finished > time && inflictor.classname != "door")
-	if (deathmatch == 4)
-		damage = damage * 8;
-	else
-		damage = damage * 4;
+	// check for quad damage powerup on the attacker
+	if (attacker.super_damage_finished > time && inflictor.classname != "door"){
+			damage = damage * 4;
+	}
 
-// save damage based on the target's armor level
+	//Less damage when jumping
+	if(targ.classname =="player" &&  !(targ.flags & FL_ONGROUND) ){		
+		damage = damage * 0.3; //half damage when jumping 
+	}
+
+
+	// save damage based on the target's armor level
 
 	save = ceil(targ.armortype*damage);
-	if (save >= targ.armorvalue)
-	{
+	if (save >= targ.armorvalue){
 		save = targ.armorvalue;
 		targ.armortype = 0;     // lost all armor
 		targ.items = targ.items - (targ.items & (IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3));
@@ -139,11 +139,10 @@ void(entity targ, entity inflictor, entity attacker, float damage) T_Damage=
 	targ.armorvalue = targ.armorvalue - save;
 	take = ceil(damage-save);
 
-// add to the damage total for clients, which will be sent as a single
-// message at the end of the frame
-// FIXME: remove after combining shotgun blasts?
-	if (targ.flags & FL_CLIENT)
-	{
+	// add to the damage total for clients, which will be sent as a single
+	// message at the end of the frame
+	// FIXME: remove after combining shotgun blasts?
+	if (targ.flags & FL_CLIENT) {
 		targ.dmg_take = targ.dmg_take + take;
 		targ.dmg_save = targ.dmg_save + save;
 		targ.dmg_inflictor = inflictor;
@@ -152,112 +151,85 @@ void(entity targ, entity inflictor, entity attacker, float damage) T_Damage=
 	damage_inflictor = inflictor;        
 
 
-// figure momentum add
-	if ( (inflictor != world) && (targ.movetype == MOVETYPE_WALK) )
-	{
+	// figure momentum add
+	if ( (inflictor != world) && (targ.movetype == MOVETYPE_WALK) ){
 		dir = targ.origin - (inflictor.absmin + inflictor.absmax) * 0.5;
 		dir = normalize(dir);
-		// Set kickback for smaller weapons
-//Zoid -- use normal NQ kickback
-//		// Read: only if it's not yourself doing the damage
-//		if ( (damage < 60) & ((attacker.classname == "player") & (targ.classname == "player")) & ( attacker.netname != targ.netname)) 
-//			targ.velocity = targ.velocity + dir * damage * 11;
-//		else                        
-		// Otherwise, these rules apply to rockets and grenades                        
-		// for blast velocity
-			targ.velocity = targ.velocity + dir * damage * 8;
+		targ.velocity = targ.velocity + dir * damage * 8;
 		
 		// Rocket Jump modifiers
 		if ( (rj > 1) && ((attacker.classname == "player") && (targ.classname == "player")) && ( attacker.netname == targ.netname)) 
 			targ.velocity = targ.velocity + dir * damage * rj;
-
 	}
 
-
-
-// check for godmode or invincibility
+	// check for godmode or invincibility
 	if (targ.flags & FL_GODMODE)
 		return;
-	if (targ.invincible_finished >= time)
-	{
-		if (self.invincible_sound < time)
-		{
+
+	if (targ.invincible_finished >= time) {
+		if (self.invincible_sound < time) {
 			sound (targ, CHAN_ITEM, "items/protect3.wav", 1, ATTN_NORM);
 			self.invincible_sound = time + 2;
 		}
 		return;
 	}
 
-// team play damage avoidance
-//ZOID 12-13-96: self.team doesn't work in QW.  Use keys
-	attackerteam = infokey(attacker, "team");
-	targteam = infokey(targ, "team");
-
-	if ((teamplay == 1) && (targteam == attackerteam) &&
-		(attacker.classname == "player") && (attackerteam != "") &&
-		inflictor.classname !="door")
+	//Tei - No friendly damage 
+	if(targ.classname == "player" && attacker.classname == "player"){
 		return;
-
-	if ((teamplay == 3) && (targteam == attackerteam) &&
-		(attacker.classname == "player") && (attackerteam != "") &&
-		(targ != attacker)&& inflictor.classname !="door")
-		return;
+	}
 		
-// do the damage
+	// do the damage
 	targ.health = targ.health - take;
 
-	if (targ.health <= 0)
-	{
+	if (targ.health <= 0){
 		Killed (targ, attacker);
 		return;
 	}
 
-// react to the damage
+	// react to the damage
 	oldself = self;
 	self = targ;
 
 	if ( (self.flags & FL_MONSTER) && attacker != world)
 	{
-	// get mad unless of the same class (except for soldiers)
+		// get mad 
 		if (self != attacker && attacker != self.enemy)
 		{
-			if ( (self.classname != attacker.classname) 
-			|| (self.classname == "monster_army" ) )
-			{
-				if (coop) {
-					if (attacker.classname == "player") { // don't swap back and forth between player attackers
-						if (self.enemy.classname != "player") {
-							self.enemy = attacker;
-							FoundTarget ();
-						} else {
-							if (range(self.enemy) == RANGE_FAR) { // allow swap if current enemy is out of range
-								self.oldenemy = self.enemy;
-								self.enemy = attacker;
-								FoundTarget ();
-							}
-						}
-					} else {
-						if (self.enemy.classname == "player")
-							self.oldenemy = self.enemy;
+
+			if (attacker.classname == "player") { // don't swap back and forth between player attackers
+				if (self.enemy.classname != "player") {
+					self.enemy = attacker;
+					FoundTarget ();
+				} else {
+					if (range(self.enemy) == RANGE_FAR) { // allow swap if current enemy is out of range
+						self.oldenemy = self.enemy;
 						self.enemy = attacker;
 						FoundTarget ();
 					}
-				} else {
-					if (self.enemy.classname == "player")
-						self.oldenemy = self.enemy;
-					self.enemy = attacker;
-					FoundTarget ();
 				}
+			} else {
+				if (self.enemy.classname == "player")
+					self.oldenemy = self.enemy;
+				self.enemy = attacker;
+				FoundTarget ();
 			}
+
 		}
 	}
 
-	if (self.th_pain)
-	{
-		self.th_pain (attacker, take);
-	// nightmare mode monsters don't go into pain frames often
-		if (skill == 3)
-			self.pain_finished = time + 5;
+	if (self.th_pain){
+		if( self.classname != "player" && self.armorvalue >50){//si mas de 50, no siento dolor
+			//Tei - do nothing, shield protect us from pain
+		}else {
+			/*			
+			dprint("PAIN!,");
+			dprint( "armorvalue=");
+			dprint(ftos(self.armorvalue));
+			dprint("\n");*/
+
+			self.th_pain(attacker, take);		
+		}		
 	}
 
 	self = oldself;

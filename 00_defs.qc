@@ -101,7 +101,7 @@ void            end_sys_globals;                // flag for structure dumping
 //
 // system fields (*** = do not set in prog code, maintained by C code)
 //
-.float          modelindex;             // *** model index in the precached list
+.float          modelindex;     // *** model index in the precached list
 .vector         absmin, absmax; // *** origin + mins / maxs
 
 .float          ltime;                  // local time for entity
@@ -141,6 +141,8 @@ void            end_sys_globals;                // flag for structure dumping
 .float          weapon;                 // one of the IT_SHOTGUN, etc flags
 .string         weaponmodel;
 .float          weaponframe;
+//.float 			weaponskin;//Tei test
+
 .float          currentammo;
 .float          ammo_shells, ammo_nails, ammo_rockets, ammo_cells;
 
@@ -393,6 +395,8 @@ float   EF_FLAG2                = 32;
 // GLQuakeWorld Stuff
 float 	EF_BLUE		=	64;	// Blue Globe effect for Quad
 float	EF_RED		=	128;	// Red Globe effect for Pentagram
+float   EF_GREEN = 256;//??? 
+
 // messages
 float   MSG_BROADCAST   = 0;            // unreliable to all
 float   MSG_ONE                 = 1;            // reliable to one (msg_entity)
@@ -625,6 +629,8 @@ void(entity e) remove                           = #15;
 // a forent of world is ignored
 void(vector v1, vector v2, float nomonsters, entity forent) traceline = #16;    
 
+void (vector v1, vector mins, vector maxs, vector v2, float nomonsters, entity ignore) tracebox = #90;
+
 entity() checkclient                            = #17;  // returns a client to look for
 entity(entity start, .string fld, string match) find = #18;
 string(string s) precache_sound         = #19;
@@ -724,7 +730,7 @@ void(vector where, float set) multicast = #82;  // sends the temp message to a s
 void(vector tdest, float tspeed, void() func) SUB_CalcMove;
 void(entity ent, vector tdest, float tspeed, void() func) SUB_CalcMoveEnt;
 void(vector destangle, float tspeed, void() func) SUB_CalcAngleMove;
-void()  SUB_CalcMoveDone;
+void() SUB_CalcMoveDone;
 void() SUB_CalcAngleMoveDone;
 void() SUB_Null;
 void() SUB_UseTargets;
@@ -756,28 +762,9 @@ float(entity targ, entity inflictor) CanDamage;
 
 .float		autorecord;
 
-// admin
-.float		coop_admin;
-.float		check_admin;
+.float super_attack_finished; // Tei when the super-attack finish
 
-.float		voted;
-.float		voted_yes;
-.float		voted_no;
+.float boots_onground;//Tei dbljump
+.float boots_ammo;//Tei dbljump
 
-float coop_motd_1;
-float coop_motd_2;
-float coop_enter_msg;
-float coop_leave_msg;
-float coop_kick_teamkillers;
-float coop_kick_teamchange;
-float coop_shamans;
-float coop_reset_empty_server;
-float coop_voting;
-float coop_voting_map;
-float coop_voting_skill;
-float coop_voting_newgame;
-float coop_election;
-float coop_vote_pct;
-entity coop_vote_timer;
-entity coop_electee;
 

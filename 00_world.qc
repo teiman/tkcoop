@@ -74,10 +74,7 @@ void() bodyque =
 
 
 //What the fuck is this werid shit?
-void() InitBodyQue =
-{
-	local entity    e;
-	
+void() InitBodyQue = {
 	bodyque_head = spawn();
 	bodyque_head.classname = "bodyque";
 	bodyque_head.owner = spawn();

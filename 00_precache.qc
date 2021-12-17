@@ -325,8 +325,36 @@ void() W_Precache =
 	precache_sound ("weapons/grenade.wav"); // grenade launcher
 	precache_sound ("weapons/bounce.wav");          // grenade bounce
 	precache_sound ("weapons/shotgn2.wav"); // super shotgun
-
+	precache_model ("progs/w_spike.mdl");
+	
 	//Enforcer fire
 	precache_model2 ("progs/laser.mdl");
 	precache_sound2 ("enforcer/enfire.wav");
+
+	//Keys lotable
+	precache_model ("progs/w_s_key.mdl");
+	precache_model ("progs/m_s_key.mdl");
+	precache_model ("progs/b_s_key.mdl");
+	precache_sound ("misc/medkey.wav");
+	precache_sound ("misc/runekey.wav");
+	precache_sound ("misc/basekey.wav");
+
+	//Quad lotable
+	precache_model ("progs/quaddama.mdl");
+	precache_sound ("items/damage.wav");
+	precache_sound ("items/damage2.wav");
+	precache_sound ("items/damage3.wav");
+
+	//ring lotable
+	precache_model ("progs/invisibl.mdl");
+	precache_sound ("items/inv1.wav");
+	precache_sound ("items/inv2.wav");
+	precache_sound ("items/inv3.wav");
+
+	//Health lotable	
+	precache_model("progs/vial.mdl");
+	precache_model("progs/shard.mdl");
+
+	precache_sound ("soldier/pain1.wav");
+	precache_sound ("soldier/pain2.wav");	
 };

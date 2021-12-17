@@ -93,8 +93,7 @@ void() player_run;
 void()  player_stand1 =[        $axstnd1,       player_stand1   ]
 {
 	self.weaponframe=0;
-	if (self.velocity_x || self.velocity_y)
-	{
+	if (self.velocity_x || self.velocity_y){
 		self.walkframe=0;
 		player_run();
 		return;
@@ -105,9 +104,7 @@ void()  player_stand1 =[        $axstnd1,       player_stand1   ]
 		if (self.walkframe >= 12)
 			self.walkframe = 0;
 		self.frame = $axstnd1 + self.walkframe;
-	}
-	else
-	{
+	}else {
 		if (self.walkframe >= 5)
 			self.walkframe = 0;
 		self.frame = $stand1 + self.walkframe;
@@ -118,21 +115,17 @@ void()  player_stand1 =[        $axstnd1,       player_stand1   ]
 void()  player_run =[   $rockrun1,      player_run      ]
 {
 	self.weaponframe=0;
-	if (!self.velocity_x && !self.velocity_y)
-	{
+	if (!self.velocity_x && !self.velocity_y){
 		self.walkframe=0;
 		player_stand1();
 		return;
 	}
 
-	if (self.weapon == IT_AXE)
-	{
+	if (self.weapon == IT_AXE) {
 		if (self.walkframe == 6)
 			self.walkframe = 0;
 		self.frame = $axrun1 + self.walkframe;
-	}
-	else
-	{
+	} else {
 		if (self.walkframe == 6)
 			self.walkframe = 0;
 		self.frame = self.frame + self.walkframe;
@@ -141,18 +134,81 @@ void()  player_run =[   $rockrun1,      player_run      ]
 };
 
 
+void() player_animateWeaponFrame = {	
+	self.weaponframe = self.weaponframe + 1;
 
-void()  player_shot1 =  [$shotatt1, player_shot2        ] {self.weaponframe=1;muzzleflash();};
-void()  player_shot2 =  [$shotatt2, player_shot3        ] {self.weaponframe=2;};
-void()  player_shot3 =  [$shotatt3, player_shot4        ] {self.weaponframe=3;};
-void()  player_shot4 =  [$shotatt4, player_shot5        ] {self.weaponframe=4;};
-void()  player_shot5 =  [$shotatt5, player_shot6        ] {self.weaponframe=5;};
-void()  player_shot6 =  [$shotatt6, player_run  ] {self.weaponframe=6;};
+	if(self.weapon == IT_AXE && self.weaponframe>6){
+		self.weaponframe = 1;
+	}
+
+	if (self.weaponframe >8)
+		self.weaponframe = 1;
+};
+
+
+void()  player_shot1 =  [$shotatt1, player_shot2        ] {
+	muzzleflash();
+	player_animateWeaponFrame();
+};
+void()  player_shot2 =  [$shotatt2, player_shot3        ] {
+	player_animateWeaponFrame();
+};
+void()  player_shot3 =  [$shotatt3, player_shot4        ] {player_animateWeaponFrame();};
+void()  player_shot4 =  [$shotatt4, player_shot5        ] {player_animateWeaponFrame();};
+void()  player_shot5 =  [$shotatt5, player_shot6        ] {player_animateWeaponFrame();};
+void()  player_shot6 =  [$shotatt6, player_run  ] {player_animateWeaponFrame();};
 
 void()  player_axe1 =   [$axatt1, player_axe2   ] {self.weaponframe=1;};
 void()  player_axe2 =   [$axatt2, player_axe3   ] {self.weaponframe=2;};
 void()  player_axe3 =   [$axatt3, player_axe4   ] {self.weaponframe=3;W_FireAxe();};
 void()  player_axe4 =   [$axatt4, player_run    ] {self.weaponframe=4;};
+
+
+void() player_axe5_super_exit;
+void() PlayerSuperAttackFinished;
+
+void() PlayerScratchMetal = {
+	if( self.flags & FL_ONGROUND){
+		GUNSHOT(self.origin + '0 0 -24', 10);
+	}	
+};
+
+void()  player_axe1_super =   [$axatt1, player_axe2_super   ] {
+	self.weaponframe=1;
+};
+void()  player_axe2_super =   [$axatt2, player_axe3_super   ] {
+	self.weaponframe=2;
+	PlayerScratchMetal();
+};
+void()  player_axe3_super =   [$axatt3, player_axe4_super   ] {
+	self.weaponframe=3;	
+	PlayerScratchMetal();
+};
+void()  player_axe4_super =   [$axatt4, player_axe5_super    ] {
+	self.weaponframe=4;
+	PlayerScratchMetal();
+};
+
+void()  player_axe5_super =   [$axatt4, player_axe5_super    ] {
+	self.weaponframe=4;
+
+	if( self.flags & FL_ONGROUND){
+		dprint("---hit floor--\n");
+		self.think = player_axe5_super_exit;
+
+		sound (self, CHAN_VOICE, "player/land.wav", 1, ATTN_NORM);
+	}	
+};
+
+void()  player_axe5_super_exit =   [$axatt4, player_run    ] {	
+	self.weaponframe=3;
+
+	//Restore th_pain and normal timers 
+	PlayerSuperAttackFinished();
+};
+
+
+
 
 void()  player_axeb1 =  [$axattb1, player_axeb2 ] {self.weaponframe=5;};
 void()  player_axeb2 =  [$axattb2, player_axeb3 ] {self.weaponframe=6;};
@@ -240,22 +296,19 @@ void() player_rocket5   =[$rockatt5, player_rocket6  ] {self.weaponframe=5;};
 void() player_rocket6   =[$rockatt6, player_run  ] {self.weaponframe=6;};
 void(float num_bubbles) DeathBubbles;
 
-void() PainSound =
-{
-local float             rs;
+void() PainSound ={
+	local float             rs;
 
 	if (self.health < 0)
 		return;
 
-	if (damage_attacker.classname == "teledeath")
-	{
+	if (damage_attacker.classname == "teledeath"){
 		sound (self, CHAN_VOICE, "player/teledth1.wav", 1, ATTN_NONE);
 		return;
 	}
 
-// water pain sounds
-	if (self.watertype == CONTENT_WATER && self.waterlevel == 3)
-	{
+	// water pain sounds
+	if (self.watertype == CONTENT_WATER && self.waterlevel == 3){
 		DeathBubbles(1);
 		if (random() > 0.5)
 			sound (self, CHAN_VOICE, "player/drown1.wav", 1, ATTN_NORM);
@@ -264,10 +317,9 @@ local float             rs;
 		return;
 	}
 
-// slime pain sounds
-	if (self.watertype == CONTENT_SLIME)
-	{
-// FIX ME       put in some steam here
+	// slime pain sounds
+	if (self.watertype == CONTENT_SLIME){
+		// FIX ME       put in some steam here
 		if (random() > 0.5)
 			sound (self, CHAN_VOICE, "player/lburn1.wav", 1, ATTN_NORM);
 		else
@@ -275,8 +327,7 @@ local float             rs;
 		return;
 	}
 
-	if (self.watertype == CONTENT_LAVA)
-	{
+	if (self.watertype == CONTENT_LAVA){
 		if (random() > 0.5)
 			sound (self, CHAN_VOICE, "player/lburn1.wav", 1, ATTN_NORM);
 		else
@@ -291,34 +342,27 @@ local float             rs;
 	}
 	self.pain_finished = time + 0.5;
 
-// don't make multiple pain sounds right after each other
+	// don't make multiple pain sounds right after each other
 
-// ax pain sound
-	if (self.axhitme == 1)
-	{
+	// ax pain sound
+	if (self.axhitme == 1){
 		self.axhitme = 0;
 		sound (self, CHAN_VOICE, "player/axhit1.wav", 1, ATTN_NORM);
 		return;
 	}
 	
 
-	rs = rint((random() * 5) + 1);
 
-	self.noise = "";
-	if (rs == 1)
-		self.noise = "player/pain1.wav";
-	else if (rs == 2)
-		self.noise = "player/pain2.wav";
-	else if (rs == 3)
-		self.noise = "player/pain3.wav";
-	else if (rs == 4)
-		self.noise = "player/pain4.wav";
-	else if (rs == 5)
-		self.noise = "player/pain5.wav";
-	else
-		self.noise = "player/pain6.wav";
+	rs = random();
 
-	sound (self, CHAN_VOICE, self.noise, 1, ATTN_NORM);
+	if (rs < 0.2) {
+		sound (self, CHAN_VOICE, "soldier/pain1.wav", 1, ATTN_NORM);
+	} else if (rs < 0.6) {
+		sound (self, CHAN_VOICE, "soldier/pain2.wav", 1, ATTN_NORM);
+	} else {
+		sound (self, CHAN_VOICE, "soldier/pain2.wav", 1, ATTN_NORM);
+	}
+
 	return;
 };
 
@@ -336,8 +380,7 @@ void()  player_axpain4 =        [       $axpain4,       player_axpain5  ] {};
 void()  player_axpain5 =        [       $axpain5,       player_axpain6  ] {};
 void()  player_axpain6 =        [       $axpain6,       player_run      ] {};
 
-void(entity attacker, float damage) player_pain =
-{
+void(entity attacker, float damage) player_pain = {
 	if (self.weaponframe)
 		return;
 
@@ -349,8 +392,9 @@ void(entity attacker, float damage) player_pain =
 	else
 		player_pain1 ();
 
-	ThrowGib ("progs/gib1.mdl", self.health);	
+	ThrowGib ("progs/gib1.mdl", damage/2);	
 };
+
 
 void() player_diea1;
 void() player_dieb1;
@@ -359,9 +403,8 @@ void() player_died1;
 void() player_diee1;
 void() player_die_ax1;
 
-void() DeathBubblesSpawn =
-{
-local entity    bubble;
+void() DeathBubblesSpawn = {
+	local entity    bubble;
 	if (self.owner.waterlevel != 3)
 		return;
 	bubble = spawn();
@@ -383,9 +426,8 @@ local entity    bubble;
 		remove(self);
 };
 
-void(float num_bubbles) DeathBubbles =
-{
-local entity    bubble_spawner;
+void(float num_bubbles) DeathBubbles = {
+	local entity    bubble_spawner;
 	
 	bubble_spawner = spawn();
 	setorigin (bubble_spawner, self.origin);
@@ -400,13 +442,11 @@ local entity    bubble_spawner;
 };
 
 
-void() DeathSound =
-{
-local float             rs;
+void() DeathSound = {
+	local float             rs;
 
 	// water death sounds
-	if (self.waterlevel == 3)
-	{
+	if (self.waterlevel == 3) {
 		DeathBubbles(5);
 		sound (self, CHAN_VOICE, "player/h2odeath.wav", 1, ATTN_NONE);
 		return;
@@ -429,10 +469,9 @@ local float             rs;
 };
 
 
-void() PlayerDead =
-{
+void() PlayerDead = {
 	self.nextthink = -1;
-// allow respawn after a certain time
+	// allow respawn after a certain time
 	self.deadflag = DEAD_DEAD;
 };
 
@@ -440,10 +479,9 @@ vector(float dm) VelocityForDamage =
 {
 	local vector v;
 
-	if (vlen(damage_inflictor.velocity)>0)
-	{
+	if (vlen(damage_inflictor.velocity)>0) {
 		v = 0.5 * damage_inflictor.velocity;
-		v = v + (25 * normalize(self.origin-damage_inflictor.origin));
+		v = v + (25 * normalize(self.origin - damage_inflictor.origin));
 		v_z = 100 + 240 * random();
 		v_x = v_x + (200 * crandom());
 		v_y = v_y + (200 * crandom());
@@ -461,18 +499,24 @@ vector(float dm) VelocityForDamage =
 		v = v * 5;
 	}
 
+	//Make sure is not too fast 
+	if(vlen(v)>400){
+		v = normalize(v);
+		v = v * 400;
+	}
+
 	return v;
 };
 
 void(string gibname, float dm) ThrowGib =
 {
-	local   entity new;
+	local entity new;
 
-	vector v = VelocityForDamage (dm);
-	if(vlen(v)>100){
-		normalize(v);
-		v = v * 100;
+	if(dm<-50){
+		dm = -50;
 	}
+
+	local vector v = VelocityForDamage (dm);
 
 	new = spawn();
 	new.origin = self.origin;
@@ -491,8 +535,45 @@ void(string gibname, float dm) ThrowGib =
 	new.flags = 0;
 };
 
-void(string gibname, float dm) ThrowHead =
+
+void() DropWeaponTouch = {
+	float speed = vlen(self.velocity);
+
+	if (other == self.owner)
+		return;		
+		
+	if (speed<1){
+		dprint("frozzenme1\n");
+		self.avelocity = '0 0 0';
+		self.angles_y = 0;
+	}
+};
+
+
+void(string gibname, float dm, vector v_mins, vector v_maxs) ThrowWeapon =
 {
+	local entity new = spawn();	
+	local vector v = VelocityForDamage (dm);
+	
+	new.origin = self.origin;
+	setmodel (new, gibname);
+	setsize (new, v_mins, v_maxs);	
+
+	new.velocity = v;
+	new.movetype = MOVETYPE_BOUNCE;
+	new.solid = SOLID_NOT;
+	new.avelocity_x = random()*300;//Tei, not has fast rotating than other
+	new.avelocity_y = random()*300;
+	new.avelocity_z = random()*300;
+	new.think = SUB_Remove;
+	new.ltime = time;
+	new.nextthink = time + 10 + random()*10;
+	new.frame = 0;
+	new.flags = 0;
+	new.touch = DropWeaponTouch;	
+};
+
+void(string gibname, float dm) ThrowHead = {
 	setmodel (self, gibname);
 	self.frame = 0;
 	self.nextthink = -1;
@@ -508,8 +589,7 @@ void(string gibname, float dm) ThrowHead =
 };
 
 
-void() GibPlayer =
-{
+void() GibPlayer = {
 	ThrowHead ("progs/h_player.mdl", self.health);
 	ThrowGib ("progs/gib1.mdl", self.health);
 	ThrowGib ("progs/gib2.mdl", self.health);
@@ -541,35 +621,6 @@ void() PlayerDie =
 	local	string	s;	
 	self.items = self.items - (self.items & IT_INVISIBILITY);
 
-	if ((stof(infokey(world,"dq"))) != 0)
-	{
-		if (self.super_damage_finished > 0)
-		{
-			DropQuad (self.super_damage_finished - time);
-			bprint (PRINT_LOW, self.netname);
-			if (deathmatch == 4)
-				bprint (PRINT_LOW, " lost an OctaPower with ");
-			else
-				bprint (PRINT_LOW, " lost a quad with ");
-			s = ftos(rint(self.super_damage_finished - time));
-			bprint (PRINT_LOW, s);
-			bprint (PRINT_LOW, " seconds remaining\n");
-		}
-	}
-
-	if ((stof(infokey(world,"dr"))) != 0)
-	{
-		if (self.invisible_finished > 0)
-		{
-			bprint (PRINT_LOW, self.netname);
-			bprint (PRINT_LOW, " lost a ring with ");
-			s = ftos(rint(self.invisible_finished - time));
-			bprint (PRINT_LOW, s);
-			bprint (PRINT_LOW, " seconds remaining\n");
-			DropRing (self.invisible_finished - time);
-		}
-	}
-
 	self.invisible_finished = 0;    // don't die as eyes
 	self.invincible_finished = 0;
 	self.super_damage_finished = 0;
@@ -587,8 +638,7 @@ void() PlayerDie =
 	if (self.velocity_z < 10)
 		self.velocity_z = self.velocity_z + random()*300;
 
-	if (self.health < -40)
-	{
+	if (self.health < -40){
 		GibPlayer ();
 		return;
 	}
@@ -598,8 +648,7 @@ void() PlayerDie =
 	self.angles_x = 0;
 	self.angles_z = 0;
 	
-	if (self.weapon == IT_AXE)
-	{
+	if (self.weapon == IT_AXE){
 		player_die_ax1 ();
 		return;
 	}
@@ -700,3 +749,6 @@ void()  player_die_ax6  =       [       $axdeth6,       player_die_ax7  ] {};
 void()  player_die_ax7  =       [       $axdeth7,       player_die_ax8  ] {};
 void()  player_die_ax8  =       [       $axdeth8,       player_die_ax9  ] {};
 void()  player_die_ax9  =       [       $axdeth9,       player_die_ax9  ] {PlayerDead();};
+
+
+

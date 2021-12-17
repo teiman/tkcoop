@@ -365,5 +365,7 @@ void() monster_shambler =
 	self.th_missile = sham_magic1;
 	self.th_pain = sham_pain;
 	
+	self.armorvalue = 300;
+
 	walkmonster_start();
 };

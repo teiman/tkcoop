@@ -33,6 +33,7 @@ void() door_blocked =
 {
 	other.deathtype = "squish";
 	T_Damage (other, self, self.goalentity, self.dmg);
+	T_Damage (other, self, self.goalentity, 120);
 
 // if a door has a negative wait, it would never come back if blocked,
 // so let it just squash the object to death real fast
@@ -691,7 +692,9 @@ void () secret_blocked =
 	if (time < self.attack_finished)
 		return;
 	self.attack_finished = time + 0.5;
-	other.deathtype = "squish";
+	other.deathtype = "squish2";
+
+	dprint("secret_blocked!\n");
 	T_Damage (other, self, self, self.dmg);
 };
 

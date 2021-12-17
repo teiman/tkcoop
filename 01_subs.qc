@@ -232,9 +232,9 @@ void() SUB_UseTargets =
 {
 	local entity t, stemp, otemp, act;
 
-//
-// check for a delay
-//
+	//
+	// check for a delay
+	//
 	if (self.delay)
 	{
 	// create a temp object to fire at a later time
@@ -250,19 +250,18 @@ void() SUB_UseTargets =
 	}
 	
 	
-//
-// print the message
-//
-	if (activator.classname == "player" && self.message != "")
-	{
+	//
+	// print the message
+	//
+	if (activator.classname == "player" && self.message != ""){
 		centerprint (activator, self.message);
 		if (!self.noise)
 			sound (activator, CHAN_VOICE, "misc/talk.wav", 1, ATTN_NORM);
 	}
 
-//
-// kill the killtagets
-//
+	//
+	// kill the killtagets
+	//
 	if (self.killtarget)
 	{
 		t = world;
@@ -275,9 +274,9 @@ void() SUB_UseTargets =
 		} while ( 1 );
 	}
 	
-//
-// fire targets
-//
+	//
+	// fire targets
+	//
 	if (self.target)
 	{
 		act = activator;

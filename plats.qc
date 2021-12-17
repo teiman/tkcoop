@@ -109,9 +109,9 @@ void() plat_trigger_use =
 
 void() plat_crush =
 {
-//dprint ("plat_crush\n");
+	//dprint ("plat_crush\n");
 
-	other.deathtype = "squish";
+	other.deathtype = "squish";	
 	T_Damage (other, self, self, 1);
 	
 	if (self.state == STATE_UP)
@@ -145,10 +145,8 @@ Set "sounds" to one of the following:
 */
 
 
-void() func_plat =
-
-{
-local entity t;
+void() func_plat = {
+	local entity t;
 
 	if (!self.t_length)
 		self.t_length = 80;
@@ -157,18 +155,16 @@ local entity t;
 
 	if (self.sounds == 0)
 		self.sounds = 2;
-// FIX THIS TO LOAD A GENERIC PLAT SOUND
+	// FIX THIS TO LOAD A GENERIC PLAT SOUND
 
-	if (self.sounds == 1)
-	{
+	if (self.sounds == 1) {
 		precache_sound ("plats/plat1.wav");
 		precache_sound ("plats/plat2.wav");
 		self.noise = "plats/plat1.wav";
 		self.noise1 = "plats/plat2.wav";
 	}
 
-	if (self.sounds == 2)
-	{
+	if (self.sounds == 2){
 		precache_sound ("plats/medplat1.wav");
 		precache_sound ("plats/medplat2.wav");
 		self.noise = "plats/medplat1.wav";
@@ -202,13 +198,10 @@ local entity t;
 
 	plat_spawn_inside_trigger ();	// the "start moving" trigger	
 
-	if (self.targetname)
-	{
+	if (self.targetname){
 		self.state = STATE_UP;
 		self.use = plat_use;
-	}
-	else
-	{
+	} else {
 		setorigin (self, self.pos2);
 		self.state = STATE_BOTTOM;
 	}
@@ -224,7 +217,9 @@ void() train_blocked =
 	if (time < self.attack_finished)
 		return;
 	self.attack_finished = time + 0.5;
-	other.deathtype = "squish";
+	other.deathtype = "squish4";
+
+	dprint("Smash blocked!\n");
 	T_Damage (other, self, self, self.dmg);
 };
 
@@ -346,8 +341,8 @@ void() func_teletrain_find;
 
 void(vector tdest, float tspeed, void() func) Teletrain_CalcMove =
 {
-local vector	vdestdelta;
-local float		len, traveltime;
+	local vector	vdestdelta;
+	local float		len, traveltime;
 
 	if (!tspeed)
 		objerror("No speed is defined!");
@@ -387,7 +382,9 @@ void() teletrain_blocked =
 	if (time < self.attack_finished)
 		return;
 	self.attack_finished = time + 0.5;
-	other.deathtype = "squish";
+	other.deathtype = "squish5";
+
+	dprint("Smash [2]!\n");
 	T_Damage (other, self, self, self.dmg);
 };
 

@@ -118,7 +118,7 @@ local entity	temp;
 	if (self.classname == "monster_ogre")
 		sound (self, CHAN_VOICE, "ogre/ogdrag.wav", 1, ATTN_IDLE);// play chainsaw drag sound
 
-//dprint ("t_movetarget\n");
+	//dprint ("t_movetarget\n");
 	self.goalentity = self.movetarget = find (world, targetname, other.target);
 	self.ideal_yaw = vectoyaw(self.goalentity.origin - self.origin);
 	if (!self.movetarget)
@@ -276,9 +276,8 @@ void() HuntTarget =
 	SUB_AttackFinished (1);	// wait a while before first attack
 };
 
-void() SightSound =
-{
-local float	rsnd;
+void() SightSound = {
+	local float	rsnd;
 
 	if (self.classname == "monster_ogre")	
 		sound (self, CHAN_VOICE, "ogre/ogwake.wav", 1, ATTN_NORM);
@@ -288,9 +287,13 @@ local float	rsnd;
 		sound (self, CHAN_VOICE, "shambler/ssight.wav", 1, ATTN_NORM);
 	else if (self.classname == "monster_demon1")
 		sound (self, CHAN_VOICE, "demon/sight2.wav", 1, ATTN_NORM);
-	else if (self.classname == "monster_wizard")
-		sound (self, CHAN_VOICE, "wizard/wsight.wav", 1, ATTN_NORM);
-	else if (self.classname == "monster_zombie")
+	else if (self.classname == "monster_wizard"){
+		if(random()<0.2){
+			sound (self, CHAN_VOICE, "boss2/sight.wav", 1, ATTN_NORM);
+		} else {
+			sound (self, CHAN_VOICE, "wizard/wsight.wav", 1, ATTN_NORM);
+		}
+	} else if (self.classname == "monster_zombie")
 		sound (self, CHAN_VOICE, "zombie/z_idle.wav", 1, ATTN_NORM);
 	else if (self.classname == "monster_dog")
 		sound (self, CHAN_VOICE, "dog/dsight.wav", 1, ATTN_NORM);
@@ -298,10 +301,7 @@ local float	rsnd;
 		sound (self, CHAN_VOICE, "hknight/sight1.wav", 1, ATTN_NORM);
 	else if (self.classname == "monster_tarbaby")
 		sound (self, CHAN_VOICE, "blob/sight1.wav", 1, ATTN_NORM);
-	else if (self.classname == "monster_vomit")
-		sound (self, CHAN_VOICE, "vomitus/v_sight1.wav", 1, ATTN_NORM);
-	else if (self.classname == "monster_enforcer")
-	{
+	else if (self.classname == "monster_enforcer") {
 		rsnd = rint(random() * 3);			
 		if (rsnd == 1)
 			sound (self, CHAN_VOICE, "enforcer/sight1.wav", 1, ATTN_NORM);
@@ -312,8 +312,9 @@ local float	rsnd;
 		else
 			sound (self, CHAN_VOICE, "enforcer/sight4.wav", 1, ATTN_NORM);
 	}
-	else if (self.classname == "monster_army")
+	else if (self.classname == "monster_army"){
 		sound (self, CHAN_VOICE, "soldier/sight1.wav", 1, ATTN_NORM);
+	}
 	else if (self.classname == "monster_shalrath")
 		sound (self, CHAN_VOICE, "shalrath/sight.wav", 1, ATTN_NORM);
 };
@@ -354,12 +355,12 @@ float() FindTarget =
 	local entity	client;
 	local float		r;
 
-// if the first spawnflag bit is set, the monster will only wake up on
-// really seeing the player, not another monster getting angry
+	// if the first spawnflag bit is set, the monster will only wake up on
+	// really seeing the player, not another monster getting angry
 
-// spawnflags & 3 is a big hack, because zombie crucified used the first
-// spawn flag prior to the ambush flag, and I forgot about it, so the second
-// spawn flag works as well
+	// spawnflags & 3 is a big hack, because zombie crucified used the first
+	// spawn flag prior to the ambush flag, and I forgot about it, so the second
+	// spawn flag works as well
 	if (sight_entity_time >= time - 0.1 && !(self.spawnflags & 3) )
 	{
 		client = sight_entity;
@@ -399,9 +400,9 @@ float() FindTarget =
 			return FALSE;
 	}
 	
-//
-// got one
-//
+	//
+	// got one
+	//
 	self.enemy = client;
 	if (self.enemy.classname != "player")
 	{
@@ -421,13 +422,11 @@ float() FindTarget =
 
 //=============================================================================
 
-void(float dist) ai_forward =
-{
+void(float dist) ai_forward = {	
 	walkmove (self.angles_y, dist);
 };
 
-void(float dist) ai_back =
-{
+void(float dist) ai_back = {
 	walkmove ( (self.angles_y+180), dist);
 };
 
@@ -439,17 +438,8 @@ ai_pain
 stagger back a bit
 =============
 */
-void(float dist) ai_pain =
-{
+void(float dist) ai_pain = {
 	ai_back (dist);
-/*
-	local float	away;
-	
-	away = anglemod (vectoyaw (self.origin - self.enemy.origin) 
-	+ 180*(random()- 0.5) );
-	
-	walkmove (away, dist);
-*/
 };
 
 /*
@@ -459,8 +449,7 @@ ai_painforward
 stagger back a bit
 =============
 */
-void(float dist) ai_painforward =
-{
+void(float dist) ai_painforward = {
 	walkmove (self.ideal_yaw, dist);
 };
 
@@ -477,11 +466,6 @@ void(float dist) ai_walk =
 	
 	movedist = dist;
 	
-	if (self.classname == "monster_dragon")
-	{
-		movetogoal (dist);
-		return;
-	}
 	// check for noticing a player
 	if (FindTarget ())
 		return;
@@ -502,8 +486,7 @@ void() ai_stand =
 	if (FindTarget ())
 		return;
 	
-	if (time > self.pausetime)
-	{
+	if (time > self.pausetime){
 		self.th_walk ();
 		return;
 	}
@@ -565,8 +548,7 @@ FacingIdeal
 
 ============
 */
-float() FacingIdeal =
-{
+float() FacingIdeal = {
 	local	float	delta;
 	
 	delta = anglemod(self.angles_y - self.ideal_yaw);
@@ -582,10 +564,10 @@ float()	WizardCheckAttack;
 float()	DogCheckAttack;
 float() ZombieCheckAttack;
 
-float() CheckAnyAttack =
-{
+float() CheckAnyAttack = {
 	if (!enemy_vis)
 		return FALSE;
+
 	if (self.classname == "monster_army")
 		return SoldierCheckAttack ();
 	if (self.classname == "monster_ogre")
@@ -723,15 +705,12 @@ void(float dist) ai_run =
 	enemy_range = range(self.enemy);
 	enemy_yaw = vectoyaw(self.enemy.origin - self.origin);
 	
-	if (self.attack_state == AS_MISSILE)
-	{
-//dprint ("ai_run_missile\n");
+	if (self.attack_state == AS_MISSILE) {
 		ai_run_missile ();
 		return;
 	}
-	if (self.attack_state == AS_MELEE)
-	{
-//dprint ("ai_run_melee\n");
+
+	if (self.attack_state == AS_MELEE) {
 		ai_run_melee ();
 		return;
 	}
@@ -739,13 +718,12 @@ void(float dist) ai_run =
 	if (CheckAnyAttack ())
 		return;					// beginning an attack
 		
-	if (self.attack_state == AS_SLIDING)
-	{
+	if (self.attack_state == AS_SLIDING) {
 		ai_run_slide ();
 		return;
 	}
 		
-// head straight in
+	// head straight in
 	movetogoal (dist);		// done in C code...
 };
 

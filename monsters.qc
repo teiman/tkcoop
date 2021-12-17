@@ -75,9 +75,18 @@ void() walkmonster_start_go =
 	
 	if (!walkmove(0,0))
 	{
+
 		dprint ("walkmonster in wall at: ");
 		dprint (vtos(self.origin));
 		dprint ("\n");
+
+		//Tei we kill him
+		if(self.classname == "monster_army" || self.classname == "monster_enforcer"){
+			self.think = SUB_Remove;
+			self.nextthink = time + 0.1;
+			return;
+		}	
+		
 	}
 	
 	self.takedamage = DAMAGE_AIM;
@@ -99,6 +108,14 @@ void() walkmonster_start_go =
 			dprint ("Monster can't find target at ");
 			dprint (vtos(self.origin));
 			dprint ("\n");
+
+			//Tei we just kill him
+			if(self.classname == "monster_army" || self.classname == "monster_enforcer"){
+				self.think = SUB_Remove;
+				self.nextthink = time + 0.1;
+				return;
+			}
+			
 		}
 // this used to be an objerror
 		if (self.movetarget.classname == "path_corner")

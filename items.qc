@@ -1,4 +1,7 @@
-void() W_SetCurrentAmmo;
+
+void (string from) W_SetCurrentAmmo;
+void () DropBackpack;
+
 /* ALL LIGHTS SHOULD BE 0 1 0 IN COLOR ALL OTHER ITEMS SHOULD
 BE .8 .3 .4 IN COLOR */
 
@@ -28,9 +31,9 @@ void() q_touch;
 
 void() q_touch =
 {
-local entity    stemp;
-local float     best;
-local string    s;
+	local entity    stemp;
+	local float     best;
+	local string    s;
 
 	if (other.classname != "player")
 		return;
@@ -44,14 +47,8 @@ local string    s;
 	self.solid = SOLID_NOT;
 	other.items = other.items | IT_QUAD;
 	self.model = string_null;
-		if (deathmatch == 4)
-		{
-			other.armortype = 0;
-			other.armorvalue = 0 * 0.01;
-			other.ammo_cells = 0;
-		}
 
-// do the apropriate action
+	// do the apropriate action
 	other.super_time = 1;
 	other.super_damage_finished = self.cnt;
 
@@ -98,9 +95,9 @@ void() r_touch;
 
 void() r_touch =
 {
-local entity    stemp;
-local float     best;
-local string    s;
+	local entity    stemp;
+	local float     best;
+	local string    s;
 
 	if (other.classname != "player")
 		return;
@@ -173,9 +170,11 @@ void() PlaceItem =
 	oldz = self.origin_z;
 	if (!droptofloor())
 	{
+		/*
 		dprint ("Bonus item fell out of level at ");
 		dprint (vtos(self.origin));
 		dprint ("\n");
+		*/
 		remove(self);
 		return;
 	}
@@ -368,82 +367,56 @@ ARMOR
 
 void() armor_touch;
 
-void() armor_touch =
-{
+void() armor_touch = {
 	local   float   type, value, bit;
 	
 	if (other.health <= 0)
-		return;
+		return;        
         
-        // exCoop
-        
-    if(other.classname == "player" || other.flags & FL_MONSTER)
-    {
-//	if (other.classname != "player")
-//		return;
+    if(other.classname == "player" || other.flags & FL_MONSTER) {
+		local string mName;
 
-    local string mName;
-	if (deathmatch == 4)
-		if (other.invincible_time > 0)
+		if (self.classname == "item_armor1"){
+			type = 0.3;
+			value = 100;
+			bit = IT_ARMOR1;
+		}
+
+		if (self.classname == "item_armor2"){
+			type = 0.6;
+			value = 150;
+			bit = IT_ARMOR2;
+		}
+
+		if (self.classname == "item_armorInv"){
+			type = 0.8;
+			value = 200;
+			bit = IT_ARMOR3;
+		}
+
+		if (other.armortype*other.armorvalue >= type*value)
 			return;
+			
+		other.armortype = type;
+		other.armorvalue = value;
+		other.items = other.items - (other.items & (IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3)) + bit;
 
-	if (self.classname == "item_armor1")
-	{
-		type = 0.3;
-		value = 100;
-		bit = IT_ARMOR1;
-	}
-	if (self.classname == "item_armor2")
-	{
-		type = 0.6;
-		value = 150;
-		bit = IT_ARMOR2;
-	}
-	if (self.classname == "item_armorInv")
-	{
-		type = 0.8;
-		value = 200;
-		bit = IT_ARMOR3;
-	}
-	if (other.armortype*other.armorvalue >= type*value)
-		return;
+		self.solid = SOLID_NOT;
+		self.model = string_null;
+		if (deathmatch && deathmatch != 2 || coop){
+			self.nextthink = time + 20;
+			self.think = SUB_regen;
+		}
+
+		if(other.classname == "player"){
+			sprint(other, PRINT_LOW, "You got armor\n");
+		}
 		
-	other.armortype = type;
-	other.armorvalue = value;
-	other.items = other.items - (other.items & (IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3)) + bit;
-
-	self.solid = SOLID_NOT;
-	self.model = string_null;
-	if (deathmatch && deathmatch != 2 || coop)
-	{
-		self.nextthink = time + 20;
-		self.think = SUB_regen;
-	}
-    if(other.classname == "player")
-	    sprint(other, PRINT_LOW, "You got armor\n");
-// armor touch sound
-	sound(other, CHAN_ITEM, "items/armor1.wav", 1, ATTN_NORM);
-    if(other.classname == "player")
-	    stuffcmd (other, "bf\n");
-    
-    if(other.classname != "player")
-    {
-        mName = ParseClass(other.classname);
-        bprint(PRINT_HIGH, "A ");
-        bprint(PRINT_HIGH, mName);
-        bprint(PRINT_HIGH, " got ");
-        
-        if(self.classname == "item_armor1")
-        bprint(PRINT_HIGH, "GA!\n");
-        if(self.classname == "item_armor2")
-        bprint(PRINT_HIGH, "YA!\n");
-        if(self.classname == "item_armorInv")
-        bprint(PRINT_HIGH, "RA!\n");
-    }
-
-	
-	activator = other;
-	SUB_UseTargets();                               // fire all targets / killtargets
+		// armor touch sound
+		sound(other, CHAN_ITEM, "items/armor1.wav", 1, ATTN_NORM);		
+		
+		activator = other;
+		SUB_UseTargets();                               // fire all targets / killtargets
     }    
 };
 
@@ -679,7 +652,7 @@ void() weapon_touch =
 		}
 	}
 
-	W_SetCurrentAmmo();
+	W_SetCurrentAmmo("weapon_touch");
 
 	self = stemp;
 
@@ -875,14 +848,14 @@ local float             best;
 		stemp = self;
 		self = other;
 		self.weapon = W_BestWeapon();
-		W_SetCurrentAmmo ();
+		W_SetCurrentAmmo ("ammo_touch1");
 		self = stemp;
 	}
 
 // if changed current ammo, update it
 	stemp = self;
 	self = other;
-	W_SetCurrentAmmo();
+	W_SetCurrentAmmo("ammo_touch2");
 	self = stemp;
 
 // remove it in single player, or setup for respawning in deathmatch - and coop - hexum
@@ -1109,17 +1082,17 @@ KEYS
 ===============================================================================
 */
 
-void() key_touch =
-{
-local entity    stemp;
-local float             best;
+void() key_touch = {
+	local entity    stemp;
+	local float             best;
 
 	if (other.classname != "player")
 		return;
 	if (other.health <= 0)
 		return;
-	if (other.items & self.items)
+	if (other.items & self.items){
 		return;
+	}
 
 	sprint (other, PRINT_LOW, "You got the ");
 	sprint (other, PRINT_LOW, self.netname);
@@ -1129,8 +1102,8 @@ local float             best;
 	stuffcmd (other, "bf\n");
 	other.items = other.items | self.items;
 
-	if (!coop)
-	{
+	//Tei is eaten
+	if(0){
 		self.solid = SOLID_NOT;
 		self.model = string_null;
 	}
@@ -1318,10 +1291,9 @@ POWERUPS
 void() powerup_touch;
 
 
-void() powerup_touch =
-{
-local entity    stemp;
-local float             best;
+void() powerup_touch = {
+	local entity    stemp;
+	local float     best;
 
 	if (other.classname != "player")
 		return;
@@ -1331,19 +1303,16 @@ local float             best;
 	sprint (other, PRINT_LOW, "You got the ");
 	sprint (other,PRINT_LOW,  self.netname);
 	sprint (other,PRINT_LOW, "\n");
-
-	if (deathmatch || coop)
-	{
-		self.mdl = self.model;
-
-		if ((self.classname == "item_artifact_invulnerability") ||
-			(self.classname == "item_artifact_invisibility"))
-			self.nextthink = time + 60*5;
-		else
-			self.nextthink = time + 60;
 	
-		self.think = SUB_regen;
-	}
+	self.mdl = self.model;
+
+	if ((self.classname == "item_artifact_invulnerability") ||
+		(self.classname == "item_artifact_invisibility"))
+		self.nextthink = time + 60*5;
+	else
+		self.nextthink = time + 60;
+
+	self.think = SUB_regen;
 
 	sound (other, CHAN_VOICE, self.noise, 1, ATTN_NORM);
 	stuffcmd (other, "bf\n");
@@ -1351,36 +1320,36 @@ local float             best;
 	other.items = other.items | self.items;
 	self.model = string_null;
 
-// do the apropriate action
-	if (self.classname == "item_artifact_envirosuit")
-	{
-		other.rad_time = 1;
-		other.radsuit_finished = time + 30;
-	}
-	
-	if (self.classname == "item_artifact_invulnerability")
-	{
-		other.invincible_time = 1;
-		other.invincible_finished = time + 30;
-	}
-	
-	if (self.classname == "item_artifact_invisibility")
-	{
-		other.invisible_time = 1;
-		other.invisible_finished = time + 30;
-	}
+	local float extra = 10;
+	if(self.cnt)
+		extra = self.cnt;
 
-	if (self.classname == "item_artifact_super_damage")
-	{
-		if (deathmatch == 4)
-		{
-			other.armortype = 0;
-			other.armorvalue = 0 * 0.01;
-			other.ammo_cells = 0;
-		}
+// do the apropriate action
+	if (self.classname == "item_artifact_envirosuit") {
+		other.rad_time = 1;
+		other.radsuit_finished = time + extra;
+	} else 	if (self.classname == "item_artifact_invulnerability") {
+		other.invincible_time = 1;
+		other.invincible_finished = time + extra;
+	} else 	if (self.classname == "item_artifact_invisibility") {
+		other.invisible_time = 1;
+		other.invisible_finished = time + extra;
+	}else if (self.classname == "item_artifact_super_damage") {		
 		other.super_time = 1;
-		other.super_damage_finished = time + 30;
-	}       
+		other.super_damage_finished = time + extra;
+
+		//dprint("Adding seconds to super damage time\n");
+	} else if (self.classname == "item_artifact_shard") {	
+		other.armorvalue = other.armorvalue + 10;
+		if(!other.armortype){
+			other.armortype = IT_ARMOR1;
+			other.items = other.items - (other.items & (IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3)) + IT_ARMOR1;
+		}
+	} else {
+		dprint("Unknown powerup???...");
+		dprint(self.classname);
+		dprint("\n");
+	}     
 
 	activator = other;
 	SUB_UseTargets();                               // fire all targets / killtargets
@@ -1402,8 +1371,8 @@ void() item_artifact_invulnerability =
 	self.noise = "items/protect.wav";
 	setmodel (self, "progs/invulner.mdl");
 	self.netname = "Pentagram of Protection";
-	if (deathmatch || coop)	// Tonik
-		self.effects = self.effects | EF_RED;
+	
+	self.effects = self.effects | EF_RED;
 	self.items = IT_INVULNERABILITY;
 	setsize (self, '-16 -16 -24', '16 16 32');
 	StartItem ();
@@ -1486,19 +1455,9 @@ void() BackpackTouch =
 {
 	local string    s;
 	local   float   best, old, new;
-	local           entity  stemp;
+	local   entity  stemp;
 	local   float   acount;
 	local   float   b_switch;
-
-	if (deathmatch == 4)
-		if (other.invincible_time > 0)
-			return;
-
-	if ((stof(infokey(other,"b_switch"))) == 0)
-		b_switch = 8;
-	else
-		b_switch = stof(infokey(other,"b_switch"));
-	
 
 	if (other.classname != "player")
 		return;
@@ -1506,43 +1465,16 @@ void() BackpackTouch =
 		return;
 		
 	acount = 0;
-	sprint (other, PRINT_LOW, "You get ");
- 
-	if (deathmatch == 4)
-	{       
-		other.health = other.health + 10;
-		sprint (other, PRINT_LOW, "10 additional health\n");
-		if ((other.health > 250) && (other.health < 300))
-			sound (other, CHAN_ITEM, "items/protect3.wav", 1, ATTN_NORM);
-		else
-			sound (other, CHAN_ITEM, "weapons/lock4.wav", 1, ATTN_NORM);
+
+	if(self.health && other.health<100){
+		sprint (other, PRINT_LOW, "You get ");
+		other.health = other.health + self.health;
+		sprint (other, PRINT_LOW, " additional health\n");
+		sound (other, CHAN_ITEM, "weapons/lock4.wav", 1, ATTN_NORM);
 		stuffcmd (other, "bf\n");
-		remove(self);
-
-		if (other.health >299)
-		{               
-			if (other.invincible_time != 1)
-			{                       
-				other.invincible_time = 1;
-				other.invincible_finished = time + 30;
-				other.items = other.items | IT_INVULNERABILITY;
-				
-				other.super_time = 1;
-				other.super_damage_finished = time + 30;
-				other.items = other.items | IT_QUAD;
-
-				other.ammo_cells = 0;		
-		
-	
-				sound (other, CHAN_VOICE, "boss1/sight1.wav", 1, ATTN_NORM);
-				stuffcmd (other, "bf\n");               
-				bprint (PRINT_HIGH, other.netname);
-				bprint (PRINT_HIGH, " attains bonus powers!!!\n");
-			}
-		}
-		self = other;
-		return;
 	}
+
+	sprint (other, PRINT_LOW, "You get ");
 	if (self.items)
 		if ((other.items & self.items) == 0)
 		{
@@ -1551,13 +1483,7 @@ void() BackpackTouch =
 			sprint (other, PRINT_LOW, self.netname);
 		}
  
-// if the player was using his best weapon, change up to the new one if better          
-	stemp = self;
-	self = other;
-	best = W_BestWeapon();
-	self = stemp;
-
-// change weapons
+	// change weapons
 	other.ammo_shells = other.ammo_shells + self.ammo_shells;
 	other.ammo_nails = other.ammo_nails + self.ammo_nails;
 	other.ammo_rockets = other.ammo_rockets + self.ammo_rockets;
@@ -1571,8 +1497,7 @@ void() BackpackTouch =
 	
 	bound_other_ammo ();
 
-	if (self.ammo_shells)
-	{
+	if (self.ammo_shells){
 		if (acount)
 			sprint(other, PRINT_LOW, ", ");
 		acount = 1;
@@ -1580,6 +1505,7 @@ void() BackpackTouch =
 		sprint (other, PRINT_LOW, s);
 		sprint (other, PRINT_LOW, " shells");
 	}
+	
 	if (self.ammo_nails)
 	{
 		if (acount)
@@ -1589,6 +1515,7 @@ void() BackpackTouch =
 		sprint (other, PRINT_LOW, s);
 		sprint (other, PRINT_LOW, " nails");
 	}
+
 	if (self.ammo_rockets)
 	{
 		if (acount)
@@ -1598,6 +1525,7 @@ void() BackpackTouch =
 		sprint (other, PRINT_LOW, s);
 		sprint (other, PRINT_LOW, " rockets");
 	}
+
 	if (self.ammo_cells)
 	{
 		if (acount)
@@ -1612,87 +1540,15 @@ void() BackpackTouch =
 		other.ammo_rockets = 5;
 
 	sprint (other, PRINT_LOW, "\n");
-// backpack touch sound
+	// backpack touch sound
 	sound (other, CHAN_ITEM, "weapons/lock4.wav", 1, ATTN_NORM);
 	stuffcmd (other, "bf\n");
 
 	remove(self);
-	self = other;
-	
-// change to the weapon
-	
-	
-	if ( WeaponCode(new) <= b_switch )
-	{
-		if (self.flags & FL_INWATER)
-		{
-			if (new != IT_LIGHTNING)
-			{
-				Deathmatch_Weapon (old, new);
-			}
-		}
-		else
-		{                
-			Deathmatch_Weapon (old, new);
-		}
-	}
-
-	W_SetCurrentAmmo ();
 };
 
-/*
-===============
-DropBackpack
-===============
-*/
-void() DropBackpack =
-{
-	local entity    item;
 
-	if (!(self.ammo_shells + self.ammo_nails + self.ammo_rockets + self.ammo_cells))
-		return; // nothing in it
 
-	item = spawn();
-	item.origin = self.origin - '0 0 24';
-	
-	item.items = self.weapon;
-	if (item.items == IT_AXE)
-		item.netname = "Axe";
-	else if (item.items == IT_SHOTGUN)
-		item.netname = "Shotgun";
-	else if (item.items == IT_SUPER_SHOTGUN)
-		item.netname = "Double-barrelled Shotgun";
-	else if (item.items == IT_NAILGUN)
-		item.netname = "Nailgun";
-	else if (item.items == IT_SUPER_NAILGUN)
-		item.netname = "Super Nailgun";
-	else if (item.items == IT_GRENADE_LAUNCHER)
-		item.netname = "Grenade Launcher";
-	else if (item.items == IT_ROCKET_LAUNCHER)
-		item.netname = "Rocket Launcher";
-	else if (item.items == IT_LIGHTNING)
-		item.netname = "Thunderbolt";
-	else
-		item.netname = "";
 
-	item.ammo_shells = self.ammo_shells;
-	item.ammo_nails = self.ammo_nails;
-	item.ammo_rockets = self.ammo_rockets;
-	item.ammo_cells = self.ammo_cells;
-
-	item.velocity_z = 300;
-	item.velocity_x = -100 + (random() * 200);
-	item.velocity_y = -100 + (random() * 200);
-	
-	item.flags = FL_ITEM;
-	item.solid = SOLID_TRIGGER;
-	item.movetype = MOVETYPE_TOSS;
-	setmodel (item, "progs/backpack.mdl");
-	setsize (item, '-16 -16 0', '16 16 56');
-	item.touch = BackpackTouch;
-	
-	item.nextthink = time + 120;    // remove after 2 minutes
-	item.think = SUB_Remove;
-};
 
 

@@ -357,7 +357,7 @@ void() tdeath_touch =
 
 void(vector org, entity death_owner) spawn_tdeath =
 {
-local entity	death;
+	local entity	death;
 
 	death = spawn();
 	death.classname = "teledeath";

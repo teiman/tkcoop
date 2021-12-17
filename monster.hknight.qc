@@ -435,6 +435,8 @@ void() monster_hell_knight =
 	self.th_missile = hknight_magicc1;
 	self.th_pain = hknight_pain;
 	self.th_die = hknight_die;
-	
+
+	self.armorvalue = 150;
+
 	walkmonster_start ();
 };

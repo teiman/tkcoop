@@ -1,4 +1,4 @@
-E:\quake\qw\spprogs.dat
+\quake\qw\spprogs.dat
 
 00_defs.qc
 00_precache.qc
@@ -11,9 +11,13 @@ fight.qc	// single
 ai.qc		// single
 combat.qc
 items.qc
+
+02_superpowers.qc
+02_dropbackpack.qc
+02_dynamicspawn.qc
+
 exutil.qc
 weapons.qc
-//world was here
 client.qc
 spectate.qc
 player.qc
@@ -25,18 +29,18 @@ misc.qc
 
 // single:
 monsters.qc
-ogre.qc
-demon.qc
-shambler.qc
-knight.qc
-soldier.qc
-wizard.qc
-dog.qc
-zombie.qc
-boss.qc
-tarbaby.qc		// registered
-hknight.qc		// registered
-fish.qc			// registered
-shalrath.qc		// registered
-enforcer.qc		// registered
-oldone.qc		// registered
+monster.ogre.qc
+monster.demon.qc
+monster.shambler.qc
+monster.knight.qc
+monster.soldier.qc
+monster.wizard.qc
+monster.dog.qc
+monster.zombie.qc
+monster.boss.qc
+monster.tarbaby.qc		// registered
+monster.hknight.qc		// registered
+monster.fish.qc			// registered
+monster.shalrath.qc		// registered
+monster.enforcer.qc		// registered
+monster.oldone.qc		// registered

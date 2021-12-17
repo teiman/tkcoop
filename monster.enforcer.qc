@@ -42,7 +42,7 @@ void() enforcer_fire =
 {
 	local vector org;
 
-	MUZZLEFLASH();
+	MUZZLEFLASH(self.origin);
 	makevectors (self.angles);
 	
 	org = self.origin + v_forward * 30 + v_right * 8.5 + '0 0 16';
@@ -105,8 +105,9 @@ void()	enf_atk10	=[	$attack6,	enf_atk11	] {enforcer_fire();};
 void()	enf_atk11	=[	$attack7,	enf_atk12	] {ai_face();};
 void()	enf_atk12	=[	$attack8,	enf_atk13	] {ai_face();};
 void()	enf_atk13	=[	$attack9,	enf_atk14	] {ai_face();};
-void()	enf_atk14	=[	$attack10,	enf_run1	] {ai_face();
-SUB_CheckRefire (enf_atk1);
+void()	enf_atk14	=[	$attack10,	enf_run1	] {
+	ai_face();
+	SUB_CheckRefire (enf_atk1);
 };
 
 void()	enf_paina1	=[	$paina1,	enf_paina2	] {};
@@ -247,13 +248,7 @@ void() enf_die =
 /*QUAKED monster_enforcer (1 0 0) (-16 -16 -24) (16 16 40) Ambush
 
 */
-void() monster_enforcer =
-{
-	if (deathmatch)
-	{
-		remove(self);
-		return;
-	}
+void() monster_enforcer = {
 	precache_model2 ("progs/enforcer.mdl");
 	precache_model2 ("progs/h_mega.mdl");
 	precache_model2 ("progs/laser.mdl");
@@ -271,7 +266,8 @@ void() monster_enforcer =
 	
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_STEP;
-
+	self.skin = floor(random()*5);//Tei, experiment
+	
 	setmodel (self, "progs/enforcer.mdl");
 
 	setsize (self, '-16 -16 -24', '16 16 40');
@@ -283,6 +279,8 @@ void() monster_enforcer =
 	self.th_pain = enf_pain;
 	self.th_die = enf_die;
 	self.th_missile = enf_atk1;
+
+	self.armorvalue = 100;
 
 	walkmonster_start();
 };

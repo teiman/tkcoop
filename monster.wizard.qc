@@ -200,7 +200,9 @@ void() Wiz_FastFire =
 		dst = self.enemy.origin - 13*self.movedir;
 	
 		vec = normalize(dst - self.origin);
-		sound (self, CHAN_WEAPON, "wizard/wattack.wav", 1, ATTN_NORM);
+		//sound (self, CHAN_WEAPON, "wizard/wattack.wav", 1, ATTN_NORM);
+		sound (self, CHAN_VOICE, "boss2/sight.wav", 1, ATTN_IDLE);
+		
 		launch_spike (self.origin, vec);
 		newmis.velocity = vec*600;
 		newmis.owner = self.owner;
@@ -222,6 +224,11 @@ void() Wiz_StartFast =
 	makevectors (self.angles);
 
 	missile = spawn ();
+
+	setmodel (missile, "progs/w_spike.mdl");
+	missile.avelocity = '600 600 600';
+	missile.velocity = '0 0 100';
+
 	missile.owner = self;
 	missile.nextthink = time + 0.6;
 	setsize (missile, '0 0 0', '0 0 0');		
@@ -232,6 +239,11 @@ void() Wiz_StartFast =
 	missile.movedir = v_right;
 
 	missile = spawn ();
+
+	setmodel (missile, "progs/w_spike.mdl");
+	missile.avelocity = '600 600 600';
+	missile.velocity = '0 0 100';
+
 	missile.owner = self;
 	missile.nextthink = time + 1;
 	setsize (missile, '0 0 0', '0 0 0');		
@@ -244,18 +256,23 @@ void() Wiz_StartFast =
 
 
 
-void() Wiz_idlesound =
-{
-local float wr;
+void() Wiz_idlesound = {
+	local float wr;
 	wr = random() * 5;
 
-	if (self.waitmin < time)
-	{
+	if (self.waitmin < time) {
 	 	self.waitmin = time + 2;
-	 	if (wr > 4.5) 
-	 		sound (self, CHAN_VOICE, "wizard/widle1.wav", 1,  ATTN_IDLE);
-	 	if (wr < 1.5)
-	 		sound (self, CHAN_VOICE, "wizard/widle2.wav", 1, ATTN_IDLE);
+
+		if( random()<0.2 ){
+			sound (self, CHAN_VOICE, "boss2/idle.wav", 1, ATTN_IDLE);
+		}else {
+			if (wr > 4.5) 
+				sound (self, CHAN_VOICE, "wizard/widle1.wav", 1,  ATTN_IDLE);
+			else if (wr < 1.5)
+				sound (self, CHAN_VOICE, "wizard/widle2.wav", 1, ATTN_IDLE);
+		}
+
+
 	}
 	return;
 };
@@ -327,8 +344,8 @@ void()	wiz_death1	=[	$death1,		wiz_death2	] {
 self.velocity_x = -200 + 400*random();
 self.velocity_y = -200 + 400*random();
 self.velocity_z = 100 + 100*random();
-self.flags = self.flags - (self.flags & FL_ONGROUND);
-sound (self, CHAN_VOICE, "wizard/wdeath.wav", 1, ATTN_NORM);
+	self.flags = self.flags - (self.flags & FL_ONGROUND);
+	sound (self, CHAN_VOICE, "wizard/wdeath.wav", 1, ATTN_NORM);
 };
 void()	wiz_death2	=[	$death2,		wiz_death3	] {};
 void()	wiz_death3	=[	$death3,		wiz_death4	]{self.solid = SOLID_NOT;};
@@ -391,6 +408,14 @@ void() monster_wizard =
 	precache_sound ("wizard/wpain.wav");
 	precache_sound ("wizard/wsight.wav");
 
+
+	//give it oldone sounds
+	precache_sound2 ("boss2/death.wav");
+	precache_sound2 ("boss2/idle.wav");
+	precache_sound2 ("boss2/sight.wav");
+	precache_sound2 ("boss2/pop2.wav");
+
+
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_STEP;
 
@@ -408,3 +433,4 @@ void() monster_wizard =
 		
 	flymonster_start ();
 };
+
