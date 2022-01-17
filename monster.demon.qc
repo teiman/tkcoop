@@ -163,6 +163,8 @@ void() demon_die =
 		return;
 	}
 
+	DropBackpack();
+
 // regular death
 	demon1_die1 ();
 };
@@ -174,26 +176,7 @@ void() Demon_MeleeAttack =
 };
 
 
-/*QUAKED monster_demon1 (1 0 0) (-32 -32 -24) (32 32 64) Ambush
-
-*/
-void() monster_demon1 =
-{
-	if (deathmatch)
-	{
-		remove(self);
-		return;
-	}
-	precache_model ("progs/demon.mdl");
-	precache_model ("progs/h_demon.mdl");
-
-	precache_sound ("demon/ddeath.wav");
-	precache_sound ("demon/dhit2.wav");
-	precache_sound ("demon/djump.wav");
-	precache_sound ("demon/dpain1.wav");
-	precache_sound ("demon/idle1.wav");
-	precache_sound ("demon/sight2.wav");
-
+void() monster_demon1_start = {
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_STEP;
 
@@ -213,14 +196,19 @@ void() monster_demon1 =
 	walkmonster_start();
 };
 
+/*QUAKED monster_demon1 (1 0 0) (-32 -32 -24) (32 32 64) Ambush */
 
-/*
-==============================================================================
+void() monster_demon1 = {
+	self.classname = "monster_demon1";
+	
+	DelaySpawn();
+};
 
-DEMON
 
-==============================================================================
-*/
+
+/* 	==============================================================================
+	DEMON
+	==============================================================================*/
 
 /*
 ==============

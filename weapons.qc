@@ -8,7 +8,7 @@ void() SuperDamageSound;
 void() W_FireLaser;
 entity (vector org, vector vec) LaunchLaser;
 void() player_axe1_super;
-
+void() player_drink1;
 
 float() crandom = {
 	return 2*(random() - 0.5);
@@ -311,129 +311,6 @@ void() T_MissileTouch = {
 
 	remove(self);
 };
-
-void() PlayRandomRicochetSound = {
-	float r;
-
-	r = random();
-	if(r<0.5){
-		sound (other, CHAN_WEAPON, "weapons/ric1.wav", 1, ATTN_NORM);
-	}else if (r<0.7){
-		sound (other, CHAN_WEAPON, "weapons/ric2.wav", 1, ATTN_NORM);
-	}else {
-		sound (other, CHAN_WEAPON, "weapons/ric3.wav", 1, ATTN_NORM);
-	}
-};
-
-void() T_LaserTouch = {
-	local float     damg;
-
-
-	if (other == self.owner)
-		return;         // don't explode on owner
-
-	if (self.voided) {
-		return;
-	}
-	self.voided = 1;
-
-	if (pointcontents(self.origin) == CONTENT_SKY){
-		remove(self);
-		return;
-	}
-
-	//dprint("HIT\n");
-
-	//Push them	
-	if(
-		other.takedamage &&
-		other.movetype != MOVETYPE_NONE && 
-		other.movetype != MOVETYPE_PUSH && 
-		other.movetype != MOVETYPE_NOCLIP
-		){
-		//dprint("Push!\n");
-
-		setorigin (other, other.origin + '0 0 1');
-
-		if (other.flags & FL_ONGROUND)
-			other.flags = other.flags - FL_ONGROUND;
-			
-		//other.velocity = other.velocity + v_forward * 20 + '0 0 1';
-		makevectors (other.v_angle);
-		other.velocity = aim (other, 10000) + v_forward*100 + v_up*(100/2);
-	}
-
-	damg = 25 + random()*5;
-
-	if(other.armorvalue >0){
-		//dprint("Ricochet!\n");
-		PlayRandomRicochetSound();
-
-		self.think = SUB_Remove;
-		self.nextthink = time + random();
-
-		other.armorvalue = other.armorvalue - 10;
-		if(other.armorvalue<0)
-			other.armorvalue = 0;
-
-		//if armour is too high, it does not even feel the byte
-		if(self.armorvalue<90){			
-			if (other.health){
-				//dprint("Damage!\n");
-				other.deathtype = "laser";
-				T_Damage (other, self, self.owner, damg*0.1 );
-			}
-		}
-		return;			
-	}
-
-	if (other.health){
-		other.deathtype = "laser";
-		T_Damage (other, self, self.owner, damg );
-	}
-
-	sound (self, CHAN_WEAPON, "weapons/sgun1.wav", 1, ATTN_NORM);
-	self.origin = self.origin - 8 * normalize(self.velocity);
-	
-	SUPERSPIKE(self.origin);
-	remove(self);
-};
-
-void() W_FireLaser = {	
-	local entity newmis;
-		
-	sound (self, CHAN_WEAPON, "enforcer/enfire.wav", 0.4, ATTN_NORM);
-
-	newmis = spawn ();
-	newmis.owner = self;
-	newmis.movetype = MOVETYPE_FLYMISSILE;
-	newmis.solid = SOLID_BBOX;
-
-	if(random()>0.8){
-		setmodel (newmis, "progs/laser.mdl");	
-	}
-
-	// set newmis speed     
-	makevectors (self.v_angle);
-
-	newmis.velocity = aim(self, 3000);
-	newmis.velocity = newmis.velocity * 3000;
-	newmis.angles = vectoangles(newmis.velocity);
-	
-	newmis.touch = T_LaserTouch;
-	newmis.voided = 0;
-	
-	// set newmis duration
-	newmis.nextthink = time + 0.5;
-	newmis.think = SUB_Remove;
-	newmis.classname = "laser";
-
-	setsize (newmis, '0 0 0', '0 0 0');             	
-
-	// lower origin 
-	setorigin (newmis,self.origin + '0 0 8');
-};
-
 
 /*
 ================
@@ -813,6 +690,10 @@ void(string from) W_SetCurrentAmmo = {
 		self.weaponframe = 0;
 
 		//dprint("[W_SetCurrentAmmo] SGG Reseting weaponframe\n");
+	} else if(self.weapon == IT_EXTRA_WEAPON){
+		self.weapon = IT_EXTRA_WEAPON;
+		self.currentammo = 0;
+		self.weaponmodel = "progs/v_drink.mdl";	
 	} else	{
 		self.currentammo = 0;
 		self.weaponmodel = "";
@@ -964,32 +845,7 @@ Go to the next weapon with ammo
 ============
 */
 void() CycleWeaponCommand = {
-	local   float   it, am;
-	
-	it = self.items;
-	self.impulse = 0;
-
-	if (self.weapon == IT_LIGHTNING) {
-		self.weapon = IT_AXE;
-	} else if (self.weapon == IT_AXE) {
-		self.weapon = IT_SHOTGUN;
-	} else if (self.weapon == IT_SHOTGUN) {
-		self.weapon = IT_SUPER_SHOTGUN;
-	} else if (self.weapon == IT_SUPER_SHOTGUN) {
-		self.weapon = IT_NAILGUN;
-	} else if (self.weapon == IT_NAILGUN) {
-		self.weapon = IT_SUPER_NAILGUN;
-	} else if (self.weapon == IT_SUPER_NAILGUN)	{
-		self.weapon = IT_GRENADE_LAUNCHER;
-	} else if (self.weapon == IT_GRENADE_LAUNCHER) {
-		self.weapon = IT_ROCKET_LAUNCHER;
-	} else if (self.weapon == IT_ROCKET_LAUNCHER) {
-		self.weapon = IT_LIGHTNING;
-	} else {
-		self.weapon = IT_AXE;
-	}
-	
-	W_SetCurrentAmmo ("CycleWeaponCommand");
+	//obsoleto
 };
 
 
@@ -1001,45 +857,7 @@ Go to the prev weapon with ammo
 ============
 */
 void() CycleWeaponReverseCommand = {
-	local   float   it, am;
-	
-	it = self.items;
-	self.impulse = 0;
-
-	if (self.weapon == IT_LIGHTNING)
-	{
-		self.weapon = IT_ROCKET_LAUNCHER;
-	}
-	else if (self.weapon == IT_ROCKET_LAUNCHER)
-	{
-		self.weapon = IT_GRENADE_LAUNCHER;
-	}
-	else if (self.weapon == IT_GRENADE_LAUNCHER)
-	{
-		self.weapon = IT_SUPER_NAILGUN;
-	}
-	else if (self.weapon == IT_SUPER_NAILGUN)
-	{
-		self.weapon = IT_NAILGUN;
-	}
-	else if (self.weapon == IT_NAILGUN)
-	{
-		self.weapon = IT_SUPER_SHOTGUN;
-	}               
-	else if (self.weapon == IT_SUPER_SHOTGUN)
-	{
-		self.weapon = IT_SHOTGUN;
-	}
-	else if (self.weapon == IT_SHOTGUN)
-	{
-		self.weapon = IT_AXE;
-	}
-	else 
-	{
-		self.weapon = IT_LIGHTNING;
-	} 
-
-	W_SetCurrentAmmo ("CycleWeaponReverseCommand");
+	//obsoleto
 };
 
 
@@ -1066,14 +884,37 @@ void() NewGame;
 void() CommandsList;
 void() SkillUp;
 void() SkillDown;
+void() PlantUSAFlag;
+
+void() hello_world = {
+	dprint("Hello world\n");
+};
 
 
 void() ImpulseCommands = {	
 	if (self.impulse >= 1 && self.impulse <= 8)
 		W_ChangeWeapon ();
 
-	if (self.impulse == 9)
-		CheatCommand ();
+	if (self.impulse == 9){
+		//__variant p;
+		/*
+		local void() p;
+		p = find_function("hello","_","world");
+		p();*/
+
+		//(find_function("hello","_","world"))();
+
+		//IT_EXTRA_WEAPON
+		self.weapon = IT_EXTRA_WEAPON;
+		self.currentammo = 0;
+		self.weaponmodel = "progs/v_drink.mdl";	
+
+		player_drink1();
+
+		//find_function("hello","_","world")();
+
+		//CheatCommand ();
+	}
 	if (self.impulse == 10)
 		CycleWeaponCommand ();
 	if (self.impulse == 11)
@@ -1081,8 +922,13 @@ void() ImpulseCommands = {
 	if (self.impulse == 12)
 		CycleWeaponReverseCommand ();
 
-	if (self.impulse == 15)
-		PlayerSuperAttack();
+	//if (self.impulse == 15)
+	//	PlayerSuperAttack();
+	
+	if (self.impulse == 15){
+		PlantUSAFlag();
+		//CCamShieldToggle ();
+	}
 
 	if (self.impulse == 22)
 		AutoRecord();
@@ -1149,6 +995,8 @@ void() SuperDamageSound = {
 	}
 	return;
 };
+
+
 
 
 

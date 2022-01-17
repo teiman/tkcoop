@@ -18,9 +18,8 @@ explosions and melee attacks.
 */
 float(entity targ, entity inflictor) CanDamage =
 {
-// bmodels need special checking because their origin is 0,0,0
-	if (targ.movetype == MOVETYPE_PUSH)
-	{
+	// bmodels need special checking because their origin is 0,0,0
+	if (targ.movetype == MOVETYPE_PUSH){
 		traceline(inflictor.origin, 0.5 * (targ.absmin + targ.absmax), TRUE, self);
 		if (trace_fraction == 1)
 			return TRUE;
@@ -54,8 +53,7 @@ float(entity targ, entity inflictor) CanDamage =
 Killed
 ============
 */
-void(entity targ, entity attacker) Killed =
-{
+void(entity targ, entity attacker) Killed = {
 	local entity oself;
 
 	oself = self;
@@ -73,9 +71,8 @@ void(entity targ, entity attacker) Killed =
 
 	self.enemy = attacker;
 
-// bump the monster counter
-	if (self.flags & FL_MONSTER)
-	{
+	// bump the monster counter
+	if (self.flags & FL_MONSTER) {
 		killed_monsters = killed_monsters + 1;
 		attacker.frags = attacker.frags + 1;
 		WriteByte (MSG_ALL, SVC_KILLEDMONSTER);
@@ -110,6 +107,9 @@ void(entity targ, entity inflictor, entity attacker, float damage) T_Damage = {
 	local   string  attackerteam, targteam;
 
 	if (!targ.takedamage)
+		return;
+
+	if(PlayerHasShield(targ))		
 		return;
 
 	// used by buttons and triggers to set activator for target firing
@@ -248,8 +248,7 @@ void(entity inflictor, entity attacker, float damage, entity ignore, string dtyp
 
 	head = findradius(inflictor.origin, damage+40);
 	
-	while (head)
-	{
+	while (head){
 		//bprint (PRINT_HIGH, head.classname);
 		//bprint (PRINT_HIGH, " | ");
 		//bprint (PRINT_HIGH, head.netname);
@@ -291,8 +290,7 @@ void(entity inflictor, entity attacker, float damage, entity ignore, string dtyp
 T_BeamDamage
 ============
 */
-void(entity attacker, float damage) T_BeamDamage =
-{
+void(entity attacker, float damage) T_BeamDamage = {
 	local   float   points;
 	local   entity  head;
 	

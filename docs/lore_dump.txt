@@ -1,0 +1,8 @@
+
+This is the super nailgun modified by us.
+Previus model was feed by nails. But the Ranger had to scavenge for ammo in the worlds of Quake has the weapon would consume the ammo deposito very quick.  
+This one uses oxygen and water in the air to create his own nails based on water structures. Thew few water particles are accelerated and shot at near light speed by the cannon, pretty much 
+like a railgun.  It has infinite ammo and shot both faster and do more damage by bullet. 
+The saved space can be use for other survival kits, like antidotes or refrigerator potions for enviroments with fire hazards, such has lava. 
+
+This weapon is the perfect merge of the earth technology and the magic found in the quake event. 

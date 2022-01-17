@@ -215,6 +215,36 @@ void() Wiz_FastFire =
 };
 
 
+
+
+void() wizardfog_2 = {   
+	self.frame = 4;
+    self.think = SUB_Remove;    
+    self.nextthink = time + 0.2;  
+};
+
+
+void() wizardfog_1 = {   
+	self.frame = 3;
+    self.think = wizardfog_2;    
+    self.nextthink = time + 0.1;  
+};
+
+void(vector org) WizardFogSpawn = {
+    local entity t = spawn();
+    
+    t.think = wizardfog_1;    
+    t.nextthink = time + 0.1;
+    t.frame = 4;
+	t.solid = SOLID_NOT;
+    t.skin = SPR_VP_PARALLEL;
+    setmodel(t,"progs/orb.spr");
+	setorigin(t,org);	
+    t.effects = t.effects | EF_GREEN;    
+};
+
+
+
 void() Wiz_StartFast =
 {
 	local	entity	missile;
@@ -237,6 +267,7 @@ void() Wiz_StartFast =
 	missile.nextthink = time + 0.8;
 	missile.think = Wiz_FastFire;
 	missile.movedir = v_right;
+	WizardFogSpawn(missile.origin);
 
 	missile = spawn ();
 
@@ -248,10 +279,12 @@ void() Wiz_StartFast =
 	missile.nextthink = time + 1;
 	setsize (missile, '0 0 0', '0 0 0');		
 	setorigin (missile, self.origin + '0 0 30' + v_forward*14 + v_right* -14);
+
 	missile.enemy = self.enemy;
 	missile.nextthink = time + 0.3;
 	missile.think = Wiz_FastFire;
 	missile.movedir = VEC_ORIGIN - v_right;
+	WizardFogSpawn(missile.origin);
 };
 
 
@@ -368,6 +401,7 @@ void() wiz_die =
 		return;
 	}
 
+	DropBackpack();
 	wiz_death1 ();
 };
 
@@ -389,13 +423,10 @@ void() Wiz_Missile =
 
 /*QUAKED monster_wizard (1 0 0) (-16 -16 -24) (16 16 40) Ambush
 */
-void() monster_wizard =
+void() monster_wizard_precache =
 {
-	if (deathmatch)
-	{
-		remove(self);
-		return;
-	}
+	self.classname = "monster_wizard";
+
 	precache_model ("progs/wizard.mdl");
 	precache_model ("progs/h_wizard.mdl");
 	precache_model ("progs/w_spike.mdl");
@@ -414,8 +445,10 @@ void() monster_wizard =
 	precache_sound2 ("boss2/idle.wav");
 	precache_sound2 ("boss2/sight.wav");
 	precache_sound2 ("boss2/pop2.wav");
+};
 
-
+void() monster_wizard_start =
+{
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_STEP;
 
@@ -434,3 +467,8 @@ void() monster_wizard =
 	flymonster_start ();
 };
 
+void() monster_wizard =
+{
+	monster_wizard_precache();
+	monster_wizard_start();
+}

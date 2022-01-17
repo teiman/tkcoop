@@ -14,18 +14,48 @@ items.qc
 
 02_superpowers.qc
 02_dropbackpack.qc
+02_delayspawn.qc
 02_dynamicspawn.qc
 
+math.qc
+
+gc.qc // garbage collector
 exutil.qc
+player.ccam.qc
+player.weapon.qc
 weapons.qc
 client.qc
 spectate.qc
-player.qc
+player.player.qc
 doors.qc
 buttons.qc
 triggers.qc
 plats.qc
 misc.qc
+
+misc.model.qc
+
+func_bob.qc
+
+fx.zasca.qc
+
+npc.lib.qc
+
+misc.scientist.qc
+npc.sorcer.qc
+npc.signal.qc
+npc.scientist.qc
+npc.anouncer.qc
+npc.tv.qc
+npc.guard.qc
+npc.mission1.qc
+npc.mission2.qc
+npc.mission3.qc
+npc.mission4.qc
+npc.vendor.qc
+npc.orientation.qc
+npc.computer.qc
+npc.weaponsexpert.qc
 
 // single:
 monsters.qc
@@ -44,3 +74,6 @@ monster.fish.qc			// registered
 monster.shalrath.qc		// registered
 monster.enforcer.qc		// registered
 monster.oldone.qc		// registered
+
+monster.supershambler.qc
+

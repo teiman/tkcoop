@@ -164,6 +164,12 @@ void()  player_axe3 =   [$axatt3, player_axe4   ] {self.weaponframe=3;W_FireAxe(
 void()  player_axe4 =   [$axatt4, player_run    ] {self.weaponframe=4;};
 
 
+void()  player_drink1 =   [$pain1, player_drink2   ] {self.weaponframe=1;};
+void()  player_drink2 =   [$pain2, player_drink3   ] {self.weaponframe=2;};
+void()  player_drink3 =   [$pain3, player_drink4   ] {self.weaponframe=3;};
+void()  player_drink4 =   [$pain4, player_run    ] {self.weaponframe=4;};
+
+
 void() player_axe5_super_exit;
 void() PlayerSuperAttackFinished;
 
@@ -752,3 +758,76 @@ void()  player_die_ax9  =       [       $axdeth9,       player_die_ax9  ] {Playe
 
 
 
+
+void(entity owner, entity shield) RepositionShield = {
+	local vector org;
+
+	makevectors(owner.angles);
+
+	//org = owner.origin  - v_forward * 18;
+	org = owner.origin;
+
+	setorigin(shield, org);
+}
+
+void() player_shield_off1;
+
+void() ShieldCreate = {
+    local entity t = spawn();
+    
+	self.shield_entity = t;
+
+    t.frame = 6;
+	t.solid = SOLID_NOT;
+    t.skin = SPR_ORIENTED;
+	//t.avelocity_z = 9000;
+	t.angles = vectoangles('0 0 1');
+	t.avelocity_y = 800;
+	t.movetype = MOVETYPE_NOCLIP;
+    setmodel(t,"progs/fx.spr");	
+	RepositionShield(self, t);
+};
+
+void() player_shield_off = {
+	local entity t = self.shield_entity;
+	t.nextthink = time;
+	t.think = SUB_Remove; //destroy
+	
+	self.shield_entity = 0;//delink 
+
+	player_shield_off1();
+};
+
+void() player_shield1 = [$deathd2, player_shield2] {};
+void() player_shield2 = [$deathd3, player_shield3] {ShieldCreate();};
+void() player_shield3 = [$deathd4, player_shield4] {
+	
+};
+
+.float shield_sound;
+
+void() player_shield4 = [$deathd4, player_shield4] {
+
+	if( self.shield_sound < time){
+		sound (self, CHAN_VOICE, "items/protect2.wav", 1, ATTN_NORM);
+		self.shield_sound = time + 1.4;
+	}
+
+	self.velocity_x = 0;
+	self.velocity_y = 0;
+	self.velocity_z = self.velocity_y * 0.01;
+
+	if(self.flags & FL_ONGROUND){
+		self.flags = self.flags - FL_ONGROUND;
+		self.movetype = MOVETYPE_NONE;
+	}
+
+	RepositionShield(self, self.shield_entity);
+};
+
+void () player_shield_off1 = [$deathd4, player_shield_off2] {
+	self.movetype = MOVETYPE_WALK;
+
+};
+void () player_shield_off2 = [$deathd2, player_run] { 
+};

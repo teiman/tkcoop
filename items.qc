@@ -239,8 +239,7 @@ void() item_health =
 {       
 	self.touch = health_touch;
 
-	if (self.spawnflags & H_ROTTEN)
-	{
+	if (self.spawnflags & H_ROTTEN) {
 		precache_model("maps/b_bh10.bsp");
 
 		precache_sound("items/r_item1.wav");
@@ -248,19 +247,14 @@ void() item_health =
 		self.noise = "items/r_item1.wav";
 		self.healamount = 15;
 		self.healtype = 0;
-	}
-	else
-	if (self.spawnflags & H_MEGA)
-	{
+	} else if (self.spawnflags & H_MEGA) {
 		precache_model("maps/b_bh100.bsp");
 		precache_sound("items/r_item2.wav");
 		setmodel(self, "maps/b_bh100.bsp");
 		self.noise = "items/r_item2.wav";
 		self.healamount = 100;
 		self.healtype = 2;
-	}
-	else
-	{
+	} else {
 		precache_model("maps/b_bh25.bsp");
 		precache_sound("items/health1.wav");
 		setmodel(self, "maps/b_bh25.bsp");
@@ -273,14 +267,9 @@ void() item_health =
 };
 
 
-void() health_touch =
-{
+void() health_touch = {
 	local   float amount;
 	local   string  s;
-	
-	if (deathmatch == 4)
-		if (other.invincible_time > 0)
-			return;
 
 	if (other.classname != "player")
 		return;
@@ -291,9 +280,7 @@ void() health_touch =
 			return;
 		if (!T_Heal(other, self.healamount, 1))
 			return;
-	}
-	else
-	{
+	} else {
 		if (!T_Heal(other, self.healamount, 0))
 			return;
 	}
@@ -312,8 +299,7 @@ void() health_touch =
 	self.solid = SOLID_NOT;
 
 	// Megahealth = rot down the player's super health
-	if (self.healtype == 2)
-	{
+	if (self.healtype == 2) {
 		other.items = other.items | IT_SUPERHEALTH;
 		if (deathmatch != 4)
 		{
@@ -321,9 +307,7 @@ void() health_touch =
 			self.think = item_megahealth_rot;
 		}
 		self.owner = other;
-	}
-	else
-	{
+	} else {
 		if (deathmatch && deathmatch != 2 || coop)            // deathmatch 2 is the silly old rules
 		{
 			self.nextthink = time + 20;
@@ -335,12 +319,10 @@ void() health_touch =
 	SUB_UseTargets();                               // fire all targets / killtargets
 };      
 
-void() item_megahealth_rot =
-{
+void() item_megahealth_rot = {
 	other = self.owner;
 	
-	if (other.health > other.max_health)
-	{
+	if (other.health > other.max_health) {
 		other.health = other.health - 1;
 		self.nextthink = time + 1;
 		return;
@@ -424,8 +406,7 @@ void() armor_touch = {
 /*QUAKED item_armor1 (0 .5 .8) (-16 -16 0) (16 16 32)
 */
 
-void() item_armor1 =
-{
+void() item_armor1 = {
 	self.touch = armor_touch;
 	precache_model ("progs/armor.mdl");
 	setmodel (self, "progs/armor.mdl");
@@ -437,8 +418,7 @@ void() item_armor1 =
 /*QUAKED item_armor2 (0 .5 .8) (-16 -16 0) (16 16 32)
 */
 
-void() item_armor2 =
-{
+void() item_armor2 = {
 	self.touch = armor_touch;
 	precache_model ("progs/armor.mdl");
 	setmodel (self, "progs/armor.mdl");
@@ -450,8 +430,7 @@ void() item_armor2 =
 /*QUAKED item_armorInv (0 .5 .8) (-16 -16 0) (16 16 32)
 */
 
-void() item_armorInv =
-{
+void() item_armorInv = {
 	self.touch = armor_touch;
 	precache_model ("progs/armor.mdl");
 	setmodel (self, "progs/armor.mdl");
@@ -468,8 +447,7 @@ WEAPONS
 ===============================================================================
 */
 
-void() bound_other_ammo =
-{
+void() bound_other_ammo = {
 	if (other.ammo_shells > 100)
 		other.ammo_shells = 100;
 	if (other.ammo_nails > 200)
@@ -481,8 +459,7 @@ void() bound_other_ammo =
 };
 
 
-float(float w) RankForWeapon =
-{
+float(float w) RankForWeapon = {
 	if (w == IT_LIGHTNING)
 		return 1;
 	if (w == IT_ROCKET_LAUNCHER)
@@ -498,8 +475,7 @@ float(float w) RankForWeapon =
 	return 7;
 };
 
-float (float w) WeaponCode =
-{
+float (float w) WeaponCode = {
 	if (w == IT_SUPER_SHOTGUN)
 		return 3;
 	if (w == IT_NAILGUN)
@@ -542,8 +518,7 @@ weapon_touch
 */
 float() W_BestWeapon;
 
-void() weapon_touch =
-{
+void() weapon_touch = {
 	local   float   hadammo, best, new, old;
 	local   entity  stemp;
 	local   float   leave;
@@ -559,7 +534,7 @@ void() weapon_touch =
 	else
 		w_switch = stof(infokey(other,"w_switch"));
 	
-// if the player was using his best weapon, change up to the new one if better          
+	// if the player was using his best weapon, change up to the new one if better          
 	stemp = self;
 	self = other;
 	best = W_BestWeapon();
@@ -570,32 +545,25 @@ void() weapon_touch =
 	else
 		leave = 0;
 	
-	if (self.classname == "weapon_nailgun")
-	{
+	if (self.classname == "weapon_nailgun")	{
 		if (leave && (other.items & IT_NAILGUN) )
 			return;
 		hadammo = other.ammo_nails;                     
 		new = IT_NAILGUN;
 		other.ammo_nails = other.ammo_nails + 30;
-	}
-	else if (self.classname == "weapon_supernailgun")
-	{
+	} else if (self.classname == "weapon_supernailgun")	{
 		if (leave && (other.items & IT_SUPER_NAILGUN) )
 			return;
 		hadammo = other.ammo_rockets;                   
 		new = IT_SUPER_NAILGUN;
 		other.ammo_nails = other.ammo_nails + 30;
-	}
-	else if (self.classname == "weapon_supershotgun")
-	{
+	} else if (self.classname == "weapon_supershotgun") {
 		if (leave && (other.items & IT_SUPER_SHOTGUN) )
 			return;
 		hadammo = other.ammo_rockets;                   
 		new = IT_SUPER_SHOTGUN;
 		other.ammo_shells = other.ammo_shells + 5;
-	}
-	else if (self.classname == "weapon_rocketlauncher")
-	{
+	} else if (self.classname == "weapon_rocketlauncher") {
 		if (leave && (other.items & IT_ROCKET_LAUNCHER) )
 			return;
 		hadammo = other.ammo_rockets;                   
@@ -637,17 +605,12 @@ void() weapon_touch =
 	stemp = self;
 	self = other;
 
-	if ( WeaponCode(new) <= w_switch )
-	{
-		if (self.flags & FL_INWATER)
-		{
-			if (new != IT_LIGHTNING)
-			{
+	if ( WeaponCode(new) <= w_switch ) {
+		if (self.flags & FL_INWATER){
+			if (new != IT_LIGHTNING){
 				Deathmatch_Weapon (old, new);
 			}
-		}
-		else
-		{                
+		} else {                
 			Deathmatch_Weapon (old, new);
 		}
 	}
@@ -708,70 +671,55 @@ if (deathmatch <= 3)
 /*QUAKED weapon_supernailgun (0 .5 .8) (-16 -16 0) (16 16 32)
 */
 
-void() weapon_supernailgun =
-{
-if (deathmatch <= 3)
-{
+void() weapon_supernailgun = {
 	precache_model ("progs/g_nail2.mdl");
 	setmodel (self, "progs/g_nail2.mdl");
 	self.weapon = IT_SUPER_NAILGUN;
 	self.netname = "Super Nailgun";
-	self.touch = weapon_touch;
+	//self.touch = weapon_touch;
 	setsize (self, '-16 -16 0', '16 16 56');
 	StartItem ();
-}
 };
 
 /*QUAKED weapon_grenadelauncher (0 .5 .8) (-16 -16 0) (16 16 32)
 */
 
-void() weapon_grenadelauncher =
-{
-if (deathmatch <= 3)
-{
+void() weapon_grenadelauncher = {
 	precache_model ("progs/g_rock.mdl");
 	setmodel (self, "progs/g_rock.mdl");
 	self.weapon = 3;
 	self.netname = "Grenade Launcher";
-	self.touch = weapon_touch;
+	//self.touch = weapon_touch;
 	setsize (self, '-16 -16 0', '16 16 56');
 	StartItem ();
-}
 };
 
 /*QUAKED weapon_rocketlauncher (0 .5 .8) (-16 -16 0) (16 16 32)
 */
 
-void() weapon_rocketlauncher =
-{
-if (deathmatch <= 3)
-{
+void() weapon_rocketlauncher = {
 	precache_model ("progs/g_rock2.mdl");
 	setmodel (self, "progs/g_rock2.mdl");
 	self.weapon = 3;
 	self.netname = "Rocket Launcher";
-	self.touch = weapon_touch;
+	//self.touch = weapon_touch;
 	setsize (self, '-16 -16 0', '16 16 56');
 	StartItem ();
-}
 };
 
 
 /*QUAKED weapon_lightning (0 .5 .8) (-16 -16 0) (16 16 32)
 */
 
-void() weapon_lightning =
-{
-if (deathmatch <= 3)
-{
+void() weapon_lightning = {
 	precache_model ("progs/g_light.mdl");
 	setmodel (self, "progs/g_light.mdl");
 	self.weapon = 3;
 	self.netname = "Thunderbolt";
-	self.touch = weapon_touch;
+	//self.touch = weapon_touch;
 	setsize (self, '-16 -16 0', '16 16 56');
 	StartItem ();
-}
+
 };
 
 
@@ -783,50 +731,47 @@ AMMO
 ===============================================================================
 */
 
-void() ammo_touch =
-{
-local entity    stemp;
-local float             best;
+void() ammo_touch = {
+	local entity    stemp;
+	local float             best;
+
+	return;//disabled until we can give them a use later 
 
 	if (other.classname != "player")
 		return;
 	if (other.health <= 0)
 		return;
 
-// if the player was using his best weapon, change up to the new one if better          
+	// if the player was using his best weapon, change up to the new one if better          
 	stemp = self;
 	self = other;
 	best = W_BestWeapon();
 	self = stemp;
 
 
-// shotgun
-	if (self.weapon == 1)
-	{
+	// shotgun
+	if (self.weapon == 1) {
 		if (other.ammo_shells >= 100)
 			return;
 		other.ammo_shells = other.ammo_shells + self.aflag;
 	}
 
-// spikes
-	if (self.weapon == 2)
-	{
+	// spikes
+	if (self.weapon == 2) {
 		if (other.ammo_nails >= 200)
 			return;
 		other.ammo_nails = other.ammo_nails + self.aflag;
 	}
 
-//      rockets
-	if (self.weapon == 3)
-	{
+	//      rockets
+	if (self.weapon == 3) {
 		if (other.ammo_rockets >= 100)
 			return;
 		other.ammo_rockets = other.ammo_rockets + self.aflag;
 	}
 
-//      cells
-	if (self.weapon == 4)
-	{
+	//      cells
+	if (self.weapon == 4) {
 		if (other.ammo_cells >= 100)
 			return;
 		other.ammo_cells = other.ammo_cells + self.aflag;
@@ -837,14 +782,12 @@ local float             best;
 	sprint (other, PRINT_LOW, "You got the ");
 	sprint (other, PRINT_LOW, self.netname);
 	sprint (other, PRINT_LOW, "\n");
-// ammo touch sound
+	// ammo touch sound
 	sound (other, CHAN_ITEM, "weapons/lock4.wav", 1, ATTN_NORM);
 	stuffcmd (other, "bf\n");
 
-// change to a better weapon if appropriate
-
-	if ( other.weapon == best )
-	{
+	// change to a better weapon if appropriate
+	if ( other.weapon == best ) {
 		stemp = self;
 		self = other;
 		self.weapon = W_BestWeapon();
@@ -852,20 +795,19 @@ local float             best;
 		self = stemp;
 	}
 
-// if changed current ammo, update it
+	// if changed current ammo, update it
 	stemp = self;
 	self = other;
 	W_SetCurrentAmmo("ammo_touch2");
 	self = stemp;
 
-// remove it in single player, or setup for respawning in deathmatch - and coop - hexum
+	// remove it in single player, or setup for respawning in deathmatch - and coop - hexum
 	self.model = string_null;
 	self.solid = SOLID_NOT;
 	if (deathmatch && (deathmatch != 2) || coop)
 		self.nextthink = time + 30;
 
-// Xian -- If playing in DM 3.0 mode, halve the time ammo respawns        
-
+	// Xian -- If playing in DM 3.0 mode, halve the time ammo respawns        
 	if (deathmatch == 3 || deathmatch == 5)        
 		self.nextthink = time + 15;
 
@@ -1345,7 +1287,48 @@ void() powerup_touch = {
 			other.armortype = IT_ARMOR1;
 			other.items = other.items - (other.items & (IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3)) + IT_ARMOR1;
 		}
-	} else {
+	} else if(self.classname == "item_book"){
+
+		switch(other.book_level){
+			case 0:
+				centerprint(other, "The magical book upgraded your damage!");	
+				break;
+			case 1:
+				centerprint(other, "You read NECRONOMICON I");	
+				break;				
+			case 2:
+				centerprint(other, "You read NECRONOMICON II");	
+				break;	
+			case 3:
+				centerprint(other, "You read BOOK OF ENOC");	
+				break;				
+			case 4:
+				centerprint(other, "You read THE MAGUS");	
+				break;	
+			case 5:
+				centerprint(other, "You read THE RED BOOK OF DRAGONS");	
+				break;	
+			case 6:
+				centerprint(other, "You read THE CATALOG OF SALOMON");	
+				break;	
+			case 7:
+				centerprint(other, "You read BOOK OF PACT WITH DAEMON");	
+				break;			
+			case 8:
+				centerprint(other, "You read COMUNION WITH OLD GODS");	
+				break;	
+			case 9:
+				centerprint(other, "You read NECRONOMICON: LOST CHAPTERS");					
+				break;														
+			case 10:
+				centerprint(other, "Ph'nglui mglw'nafh Cthulhu \nR'lyeh wgah'nagl fhtagn");	
+				break;																			
+		}
+		
+		other.book_level = other.book_level + 1;
+		if(other.book_level>10)//TODO: allow a higuer maximun booklevel
+			other.book_level = 10;
+	}else {
 		dprint("Unknown powerup???...");
 		dprint(self.classname);
 		dprint("\n");

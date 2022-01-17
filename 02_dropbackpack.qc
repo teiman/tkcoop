@@ -45,6 +45,8 @@ void(entity item) DropHasKey = {
 		item.noise = "misc/basekey.wav";
 	}	
 
+	item.classname = "item_key";
+
 	item.touch = key_touch;
 	item.items = IT_KEY1;
 	setsize (item, '-16 -16 -24', '16 16 32');
@@ -53,13 +55,37 @@ void(entity item) DropHasKey = {
 };
 
 
+void(entity item) DropHasGoldKey = {
+	if (world.worldtype == 0){			
+		setmodel (item, "progs/w_g_key.mdl");
+		item.netname = "gold key";
+		item.noise = "misc/medkey.wav";
+	} else if (world.worldtype == 1) {			
+		setmodel (item, "progs/m_g_key.mdl");
+		item.netname = "gold runekey";
+		item.noise = "misc/runekey.wav";
+	} else if (world.worldtype == 2) {			
+		setmodel (item, "progs/b_g_key.mdl");
+		item.netname = "gold keycard";
+		item.noise = "misc/basekey.wav";
+	}	
+
+	item.touch = key_touch;
+	item.items = IT_KEY2;
+	setsize (item, '-16 -16 -24', '16 16 32');
+	item.nextthink = time + 0.5;    // items start after other solids
+	item.think = PlaceItem;	
+};
+
+
+
 void(entity item) DropHasQuad = {
 	
 	item.noise = "items/damage.wav";
 	setmodel (item, "progs/quaddama.mdl");	
 	item.netname = "Quad Damage";	
 	item.items = IT_QUAD;	
-	item.effects = item.effects | EF_BLUE;	
+	item.effects = item.effects | EF_BLUE| EF_SMALLFX;	
 	item.cnt = 10;
 	item.classname = "item_artifact_super_damage";
 
@@ -75,15 +101,30 @@ void(entity item) DropHasRing = {
 	setmodel (item, "progs/invisibl.mdl");
 	item.netname = "Ring of Shadows";
 	item.items = IT_INVISIBILITY;
-	item.effects = item.effects | EF_BLUE;
+	item.effects = item.effects | EF_BLUE | EF_SMALLFX;
 	item.cnt = 10;
 	item.classname = "item_artifact_invisibility";
 
 	setsize (item, '-16 -16 -24', '16 16 32');
 	item.touch = powerup_touch;
-	item.nextthink = time + 0.5;    // items start after other solids
+	item.nextthink = time + 0.5;    
 	item.think = PlaceItem;	
 };
+
+void(entity item) DropHasBook = {	
+	setmodel (item, "progs/artifact_tome.mdl");	
+	item.classname = "item_book";
+	item.noise = "items/armor1.wav";
+
+	setsize (item, '-8 -1 0', '5 2 17');	
+
+	item.touch = powerup_touch;
+	item.nextthink = time + 0.5;    
+	item.think = PlaceItem;	
+	item.effects = EF_GREEN | EF_SMALLFX;
+};
+
+
 
 void(entity item) DropHasArmour = {	
 	setmodel (item, "progs/shard.mdl");	
@@ -94,7 +135,7 @@ void(entity item) DropHasArmour = {
 	setsize (item, '-8 -1 0', '5 2 17');	
 
 	item.touch = powerup_touch;
-	item.nextthink = time + 0.5;    // items start after other solids
+	item.nextthink = time + 0.5;    
 	item.think = PlaceItem;	
 };
 
@@ -135,6 +176,7 @@ entity(vector org) MakeDropableItem = {
     local entity item;
 
 	item = spawn();
+	item.classname = "dropable_item";
 	item.origin = org;
 	item.velocity_z = 300;
 	item.velocity_x = -100 + (random() * 200);
@@ -163,26 +205,43 @@ void() DropBackpack = {
 	if (!(self.ammo_shells + self.ammo_nails + self.ammo_rockets + self.ammo_cells)){
 		return; // nothing in it
     }
-
-    item = MakeDropableItem(self.origin);
+    
 	r = random();
 
 	if(r<0.1){
+		item = MakeDropableItem(self.origin);				
+		
 		r = random();
-		if(r<0.3)
+		
+		if(r<0.2){
+			DropHasBook(item);
+		} else if(r<0.4)
 			DropHasQuad(item);
-		else if (r<0.5)
+		else if (r<0.6)
 			DropHasArmour(item);
-		else if (r<0.8)
+		else if (r<0.9)
 			DropHasRing(item);
 		else
 			DropHasKey(item);
-	}else{
-       // DropHasBackpack(item);
+		
+		item.nextthink = time + 120;    // remove after 2 minutes
+		item.think = SUB_Remove;
 	}
 
-	item.nextthink = time + 120;    // remove after 2 minutes
-	item.think = SUB_Remove;
+	if ( 
+			(
+			self.classname == "monster_wizard" || 
+			self.classname == "monster_ogre"  ||
+			self.classname == "monster_demon1" 
+			) 
+			&& random()<0.5
+		){
+		item = MakeDropableItem(self.origin);
+		DropHasBook(item);
+
+		item.nextthink = time + 120;    // remove after 2 minutes
+		item.think = SUB_Remove;
+	}
 
 	if(random()<0.8){
 		//Spawn healthkits    

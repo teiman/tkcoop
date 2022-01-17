@@ -343,10 +343,14 @@ entity (vector org, vector vec) LaunchLaser =
 	newmis = spawn();
 	newmis.owner = self;
 	newmis.movetype = MOVETYPE_FLY;
-	newmis.solid = SOLID_BBOX;
-	newmis.effects = EF_DIMLIGHT;
+	newmis.solid = SOLID_BBOX;	
 
-	setmodel (newmis, "progs/laser.mdl");
+	if(self.is_boss){
+		setmodel (newmis, "progs/w_spike.mdl");
+		newmis.effects = EF_DIMLIGHT;
+	}else{
+		setmodel (newmis, "progs/laser.mdl");
+	}
 	setsize (newmis, '0 0 0', '0 0 0');             
 
 	setorigin (newmis, org);
@@ -728,3 +732,6 @@ void() misc_noisemaker =
 	self.nextthink = time + 0.1 + random();
 	self.think = noise_think;
 };
+
+
+

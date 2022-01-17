@@ -398,11 +398,8 @@ void() hknight_melee =
 */
 void() monster_hell_knight =
 {
-	if (deathmatch)
-	{
-		remove(self);
-		return;
-	}
+	self.classname = "monster_hell_knight";
+
 	precache_model2 ("progs/hknight.mdl");
 	precache_model2 ("progs/k_spike.mdl");
 	precache_model2 ("progs/h_hellkn.mdl");

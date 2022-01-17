@@ -1,4 +1,6 @@
 
+void() monster_ogre_precache;
+void() npc_sorcer_precache;
 
 void () World_precache = {
 
@@ -239,12 +241,13 @@ void() System_precache = {
     precache_model ("progs/s_explod.spr");  // sprite explosion
 
     precache_model ("progs/v_axe.mdl");
-    precache_model ("progs/v_shot.mdl");
-    precache_model ("progs/v_nail.mdl");
-    precache_model ("progs/v_rock.mdl");
-    precache_model ("progs/v_shot2.mdl");
+    precache_model ("progs/v_shot.mdl");//TODO: remove
+    precache_model ("progs/v_nail.mdl");//TODO: remove
+    precache_model ("progs/v_rock.mdl");//TODO: remove
+    precache_model ("progs/v_shot2.mdl");//TODO: remove
     precache_model ("progs/v_nail2.mdl");
-    precache_model ("progs/v_rock2.mdl");
+    precache_model ("progs/v_rock2.mdl");//TODO: remove
+	precache_model ("progs/v_drink.mdl");
 
     precache_model ("progs/bolt.mdl");              // for lightning gun
     precache_model ("progs/bolt2.mdl");             // for lightning gun
@@ -310,6 +313,102 @@ void() System_precache = {
 };
 
 
+
+void() misc_scientist_precache = {
+    precache_model("progs/misc/misc_scientist.mdl");
+	precache_model("progs/h_zombie.mdl");
+	precache_sound("zombie/z_gib.wav");
+	precache_sound("scientist/allnominal.wav");
+	precache_sound("scientist/alright.wav");
+	precache_sound("scientist/asexpected.wav");
+	precache_sound("scientist/c1a0_sci_crit2a.wav");
+	precache_sound("scientist/cough.wav");
+	precache_sound("scientist/cantbeserious.wav");
+	precache_sound("scientist/c1a0_sci_stall.wav");
+	precache_sound("scientist/sci_die1.wav");
+	precache_sound("scientist/scream08.wav");
+	precache_sound("scientist/scream23.wav");
+	precache_sound("scientist/scream24.wav");
+	precache_sound("scientist/sci_dragoff.wav");
+	precache_sound("scientist/sci_fear6.wav");
+	precache_sound("scientist/sci_fear7.wav");
+	precache_sound("scientist/sci_fear8.wav");
+	precache_sound("scientist/sci_fear13.wav");
+	precache_sound("scientist/sci_fear15.wav");
+	precache_sound("scientist/scream01.wav");
+	precache_sound("scientist/scream06.wav");
+	precache_sound("scientist/scream09.wav");
+	precache_sound("scientist/scream10.wav");
+	precache_sound("scientist/scream14.wav");
+	precache_sound("scientist/scream15.wav");
+	precache_sound("scientist/scream16.wav");
+	precache_sound("scientist/scream17.wav");
+	precache_sound("scientist/scream18.wav");
+	precache_sound("scientist/scream19.wav");
+	precache_sound("scientist/scream20.wav");
+	precache_sound("scientist/scream22.wav");
+	precache_sound("scientist/scream25.wav");
+};
+
+void() monster_demon1_precache = {
+	precache_model ("progs/demon.mdl");
+	precache_model ("progs/h_demon.mdl");
+
+	precache_sound ("demon/ddeath.wav");
+	precache_sound ("demon/dhit2.wav");
+	precache_sound ("demon/djump.wav");
+	precache_sound ("demon/dpain1.wav");
+	precache_sound ("demon/idle1.wav");
+	precache_sound ("demon/sight2.wav");
+};
+
+void() monster_army_precache = {	
+	
+	precache_model ("progs/soldier.mdl");
+	precache_model ("progs/soldier_weapon.mdl");
+	precache_model ("progs/h_guard.mdl");
+	precache_model ("progs/gib1.mdl");
+	precache_model ("progs/gib2.mdl");
+	precache_model ("progs/gib3.mdl");
+
+	precache_sound ("soldier/death1.wav");
+	precache_sound ("soldier/idle.wav");
+	precache_sound ("soldier/pain1.wav");
+	precache_sound ("soldier/pain2.wav");
+	precache_sound ("soldier/sattck1.wav");
+	precache_sound ("soldier/sight1.wav");
+
+	precache_sound ("player/udeath.wav");		// gib death
+}	
+
+void() monster_enforcer_precache = {
+	precache_model2 ("progs/enforcer.mdl");
+	precache_model2 ("progs/h_mega.mdl");
+	precache_model2 ("progs/laser.mdl");
+
+	precache_sound2 ("enforcer/death1.wav");
+	precache_sound2 ("enforcer/enfire.wav");
+	precache_sound2 ("enforcer/enfstop.wav");
+	precache_sound2 ("enforcer/idle1.wav");
+	precache_sound2 ("enforcer/pain1.wav");
+	precache_sound2 ("enforcer/pain2.wav");
+	precache_sound2 ("enforcer/sight1.wav");
+	precache_sound2 ("enforcer/sight2.wav");
+	precache_sound2 ("enforcer/sight3.wav");
+	precache_sound2 ("enforcer/sight4.wav");
+};
+
+
+
+void() monster_fish_precache = {
+
+	precache_model2 ("progs/fish.mdl");
+
+	precache_sound2 ("fish/death.wav");
+	precache_sound2 ("fish/bite.wav");
+	precache_sound2 ("fish/idle.wav");
+};
+
 // called by worldspawn
 void() W_Precache =
 {
@@ -330,11 +429,15 @@ void() W_Precache =
 	//Enforcer fire
 	precache_model2 ("progs/laser.mdl");
 	precache_sound2 ("enforcer/enfire.wav");
+	precache_sound2 ("lazerin.wav");
 
 	//Keys lotable
 	precache_model ("progs/w_s_key.mdl");
 	precache_model ("progs/m_s_key.mdl");
 	precache_model ("progs/b_s_key.mdl");
+	precache_model ("progs/w_g_key.mdl");
+	precache_model ("progs/m_g_key.mdl");
+	precache_model ("progs/b_g_key.mdl");
 	precache_sound ("misc/medkey.wav");
 	precache_sound ("misc/runekey.wav");
 	precache_sound ("misc/basekey.wav");
@@ -357,4 +460,45 @@ void() W_Precache =
 
 	precache_sound ("soldier/pain1.wav");
 	precache_sound ("soldier/pain2.wav");	
+
+	precache_model("progs/eye.mdl");
+
+	precache_model("progs/orb.spr");
+	precache_model("progs/fx.spr");
+
+	//Boss
+	precache_sound ("boss1/sight1.wav");
+	precache_sound ("shalrath/attack2.wav");
+	precache_model("progs/v_spike.mdl");
+
+	//Shield
+	precache_sound ("items/protect.wav");
+	precache_sound ("items/protect2.wav");
+	precache_sound ("items/protect3.wav");
+
+	precache_sound ("horde1.wav");
+	precache_sound ("horde2.wav");
+	precache_sound ("horde3.wav");
+	precache_sound ("horde4.wav");
+	precache_sound ("horde5.wav");
+
+	//Many uses
+	precache_model("progs/invisible.spr");
+	precache_model("progs/flag.mdl");
+	precache_sound ("gousa.wav");
+	
+	precache_model("progs/artifact_tome.mdl");
+
+	precache_model("progs/zasca.spr");
+
+	//Generic monster to use everywhere
+	monster_army_precache();
+	monster_enforcer_precache();
+	monster_fish_precache();
+	monster_demon1_precache();
+	misc_scientist_precache();
+
+	npc_sorcer_precache();
 };
+
+

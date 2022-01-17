@@ -7,6 +7,7 @@ void () player_stand1;
 void (vector org) spawn_tfog;
 void (vector org, entity death_owner) spawn_tdeath;
 void () RandomAxeAttack;
+float() nextmap_isset;
 
 //void () DisplayMap;
 
@@ -72,62 +73,71 @@ void() info_intermission =
 };
 
 
-void() SetChangeParms =
+/*
+void PF2_setspawnparms(byte* base, uintptr_t mask, pr2val_t* stack, pr2val_t*retval)
 {
+	int			i;
+	//edict_t		*ent;
+	int			entnum=stack[0]._int;
+	client_t	*client;
+
+	//ent = EDICT_NUM(entnum);
+
+	if (entnum < 1 || entnum > MAX_CLIENTS)
+		PR2_RunError("Entity is not a client");
+
+	// copy spawn parms out of the client_t
+	client = svs.clients + (entnum - 1);
+
+	for (i = 0; i < NUM_SPAWN_PARMS; i++)
+		(&pr_global_struct->parm1)[i] = client->spawn_parms[i];
+}
+*/
+
+void() SetChangeParms = {
+
 	if (self.health <= 0) {
 		SetNewParms ();	
 		return;
 	}
-
-// remove items
-	self.items = self.items - (self.items & (IT_KEY1 | IT_KEY2 | IT_INVISIBILITY | IT_INVULNERABILITY | IT_SUIT | IT_QUAD) );
-
-// cap super health
-	if (self.health > 100)
-		self.health = 100;
-	if (self.health < 50)
-		self.health = 50;
+	
+	self.health = 100;
 	parm1 = self.items;
 	parm2 = self.health;
-	parm3 = self.armorvalue;
-	if (self.ammo_shells < 25)
-		parm4 = 25;
-	else
-		parm4 = self.ammo_shells;
-	parm5 = self.ammo_nails;
-	parm6 = self.ammo_rockets;
-	parm7 = self.ammo_cells;
-	parm8 = self.weapon;
-	parm9 = self.armortype * 100;
+	parm3 = self.armorvalue;	
+	parm4 = self.mission_stage;
 };
 
-void() SetNewParms =
-{
+void() SetNewParms = {
+	//Tei: really reset everything
+	dprint("Resetting global params\n");
+
 	parm1 = IT_SHOTGUN | IT_AXE;
-	parm2 = 100;
-	parm3 = 0;
-	parm4 = 25;
-	parm5 = 0;
-	parm6 = 0;
-	parm7 = 0;
-	parm8 = 1;
-	parm9 = 0;
+	parm2 = 100;	
 };
 
 void() DecodeLevelParms =
 {	
-	if (world.model == "maps/start.bsp")
-		SetNewParms ();         // take away all stuff on starting new episode
-
+	//if (world.model == "maps/start.bsp")
+	//	SetNewParms ();         // take away all stuff on starting new episode
+	
+	self.weapon = IT_SHOTGUN;
 	self.items = parm1;
 	self.health = parm2;
 	self.armorvalue = parm3;
-	self.ammo_shells = parm4;
-	self.ammo_nails = parm5;
-	self.ammo_rockets = parm6;
-	self.ammo_cells = parm7;
-	self.weapon = parm8;
+	self.mission_stage = parm4;		
 	self.armortype = parm9 * 0.01;	
+	
+	/*
+	dprint("[DecodeLevelParms] parm1=");dprint(ftos(parm1));dprint("\n");
+	dprint("[DecodeLevelParms] parm2=");dprint(ftos(parm2));dprint("\n");
+	dprint("[DecodeLevelParms] parm3=");dprint(ftos(parm3));dprint("\n");
+	dprint("[DecodeLevelParms] parm4=");dprint(ftos(parm4));dprint("\n");
+	dprint("[DecodeLevelParms] parm5=");dprint(ftos(parm5));dprint("\n");
+	dprint("[DecodeLevelParms] parm6=");dprint(ftos(parm6));dprint("\n");
+	dprint("[DecodeLevelParms] parm7=");dprint(ftos(parm7));dprint("\n");
+	dprint("[DecodeLevelParms] parm8=");dprint(ftos(parm8));dprint("\n");
+	*/
 };
 
 /*
@@ -137,18 +147,16 @@ FindIntermission
 Returns the entity to view from
 ============
 */
-entity() FindIntermission =
-{
+entity() FindIntermission = {
 	local   entity spot;
 	local   float cyc;
 
-// look for info_intermission first
+	// look for info_intermission first
 	spot = find (world, classname, "info_intermission");
-	if (spot)
-	{       // pick a random one
+	if (spot) {
+		// pick a random one
 		cyc = random() * 4;
-		while (cyc > 1)
-		{
+		while (cyc > 1) {
 			spot = find (spot, classname, "info_intermission");
 			if (!spot)
 				spot = find (spot, classname, "info_intermission");
@@ -157,7 +165,7 @@ entity() FindIntermission =
 		return spot;
 	}
 
-// then look for the start position
+	// then look for the start position
 	spot = find (world, classname, "info_player_start");
 	if (spot)
 		return spot;
@@ -168,117 +176,37 @@ entity() FindIntermission =
 };
 
 
-void() GotoNextMap =
-{
+void() GotoNextMap = {
 	local string newmap;
     local float players;
-    
-	//ZOID: 12-13-96, samelevel is overloaded, only 1 works for same level
-	localcmd("localinfo coop_players_online ");
-	players = GetPlayerCount();
-	localcmd(ftos(players));
-	localcmd("\n");
+	local entity e;
+	
+	if( mapname != "hub1"){
 
-	if (!deathmatch)
-		changelevel (nextmap);
-	else if (cvar("samelevel") == 1)     // if samelevel is set, stay on same level
-		changelevel (mapname);
-	else {
-		// configurable map lists, see if the current map exists as a
-		// serverinfo/localinfo var
-		newmap = infokey(world, mapname);
-		if (newmap != "")
-			changelevel (newmap);
-		else
-			changelevel (nextmap);
+		e = find(world, classname, "player");
+		while (e != world) {
+			if(mapname == MISSION1){
+				e.mission_stage = e.mission_stage | EPISODE1_COMPLETE;			
+			}else if(mapname == MISSION2){
+				e.mission_stage = e.mission_stage | EPISODE2_COMPLETE;			
+			}else if (mapname == MISSION3){
+				e.mission_stage = e.mission_stage | EPISODE3_COMPLETE;			
+			}else if (mapname == MISSION4){
+				e.mission_stage = e.mission_stage | EPISODE4_COMPLETE;			
+			}
+
+			e = find(e, classname, "player");
+		}
+
+		changelevel ("hub1");
+	} else {
+		if(nextmap_isset()){
+			changelevel (nextmap_selected);
+		}
 	}
 };
 
-void() ExitIntermission =
-{
-// skip any text in deathmatch
-	if (deathmatch)
-	{
-		GotoNextMap ();
-		return;
-	}
-
-	intermission_exittime = time + 1;
-	intermission_running = intermission_running + 1;
-
-//
-// run some text if at the end of an episode
-//
-	if (intermission_running == 2)
-	{
-		if (world.model == "maps/e1m7.bsp")
-		{
-			WriteByte (MSG_ALL, SVC_CDTRACK);
-			WriteByte (MSG_ALL, 2);
-//			WriteByte (MSG_ALL, 3);
-			if (!cvar("registered"))
-			{
-				WriteByte (MSG_ALL, SVC_FINALE);
-				WriteString (MSG_ALL, "As the corpse of the monstrous entity\nChthon sinks back into the lava whence\nit rose, you grip the Rune of Earth\nMagic tightly. Now that you have\nconquered the Dimension of the Doomed,\nrealm of Earth Magic, you are ready to\ncomplete your task in the other three\nhaunted lands of Quake. Or are you? If\nyou don't register Quake, you'll never\nknow what awaits you in the Realm of\nBlack Magic, the Netherworld, and the\nElder World!");
-			}
-			else
-			{
-				WriteByte (MSG_ALL, SVC_FINALE);
-				WriteString (MSG_ALL, "As the corpse of the monstrous entity\nChthon sinks back into the lava whence\nit rose, you grip the Rune of Earth\nMagic tightly. Now that you have\nconquered the Dimension of the Doomed,\nrealm of Earth Magic, you are ready to\ncomplete your task. A Rune of magic\npower lies at the end of each haunted\nland of Quake. Go forth, seek the\ntotality of the four Runes!");
-			}
-			return;
-		}
-		else if (world.model == "maps/e2m6.bsp")
-		{
-			WriteByte (MSG_ALL, SVC_CDTRACK);
-			WriteByte (MSG_ALL, 2);
-//			WriteByte (MSG_ALL, 3);
-
-			WriteByte (MSG_ALL, SVC_FINALE);
-			WriteString (MSG_ALL, "The Rune of Black Magic throbs evilly in\nyour hand and whispers dark thoughts\ninto your brain. You learn the inmost\nlore of the Hell-Mother; Shub-Niggurath!\nYou now know that she is behind all the\nterrible plotting which has led to so\nmuch death and horror. But she is not\ninviolate! Armed with this Rune, you\nrealize that once all four Runes are\ncombined, the gate to Shub-Niggurath's\nPit will open, and you can face the\nWitch-Goddess herself in her frightful\notherworld cathedral.");
-			return;
-		}
-		else if (world.model == "maps/e3m6.bsp")
-		{
-			WriteByte (MSG_ALL, SVC_CDTRACK);
-			WriteByte (MSG_ALL, 2);
-//			WriteByte (MSG_ALL, 3);
-
-			WriteByte (MSG_ALL, SVC_FINALE);
-			WriteString (MSG_ALL, "The charred viscera of diabolic horrors\nbubble viscously as you seize the Rune\nof Hell Magic. Its heat scorches your\nhand, and its terrible secrets blight\nyour mind. Gathering the shreds of your\ncourage, you shake the devil's shackles\nfrom your soul, and become ever more\nhard and determined to destroy the\nhideous creatures whose mere existence\nthreatens the souls and psyches of all\nthe population of Earth.");
-			return;
-		}
-		else if (world.model == "maps/e4m7.bsp")
-		{
-			WriteByte (MSG_ALL, SVC_CDTRACK);
-			WriteByte (MSG_ALL, 2);
-//			WriteByte (MSG_ALL, 3);
-
-			WriteByte (MSG_ALL, SVC_FINALE);
-			WriteString (MSG_ALL, "Despite the awful might of the Elder\nWorld, you have achieved the Rune of\nElder Magic, capstone of all types of\narcane wisdom. Beyond good and evil,\nbeyond life and death, the Rune\npulsates, heavy with import. Patient and\npotent, the Elder Being Shub-Niggurath\nweaves her dire plans to clear off all\nlife from the Earth, and bring her own\nfoul offspring to our world! For all the\ndwellers in these nightmare dimensions\nare her descendants! Once all Runes of\nmagic power are united, the energy\nbehind them will blast open the Gateway\nto Shub-Niggurath, and you can travel\nthere to foil the Hell-Mother's plots\nin person.");
-			return;
-		}
-
-		GotoNextMap();
-	}
-
-	if (intermission_running == 3)
-	{
-		if (!cvar("registered"))
-		{	// shareware episode has been completed, go to sell screen
-			WriteByte (MSG_ALL, SVC_SELLSCREEN);
-			return;
-		}
-
-		if ( (serverflags&15) == 15)
-		{
-			WriteByte (MSG_ALL, SVC_FINALE);
-			WriteString (MSG_ALL, "Now, you have all four Runes. You sense\ntremendous invisible forces moving to\nunseal ancient barriers. Shub-Niggurath\nhad hoped to use the Runes Herself to\nclear off the Earth, but now instead,\nyou will use them to enter her home and\nconfront her as an avatar of avenging\nEarth-life. If you defeat her, you will\nbe remembered forever as the savior of\nthe planet. If she conquers, it will be\nas if you had never been born.");
-			return;
-		}
-		
-	}
-
+void() ExitIntermission = {
 	GotoNextMap();
 };
 
@@ -305,84 +233,22 @@ Take the players to the intermission spot
 */
 void() execute_changelevel =
 {
-	local entity    pos;
-
-	intermission_running = 1;
-	
-// enforce a wait time before allowing changelevel
-	//intermission_exittime = time + 5;
-	intermission_exittime = time + 0.1;
-
-	pos = FindIntermission ();
-
-// play intermission music
-	WriteByte (MSG_ALL, SVC_CDTRACK);
-	WriteByte (MSG_ALL, 3);
-
-	WriteByte (MSG_ALL, SVC_INTERMISSION);
-	WriteCoord (MSG_ALL, pos.origin_x);
-	WriteCoord (MSG_ALL, pos.origin_y);
-	WriteCoord (MSG_ALL, pos.origin_z);
-	WriteAngle (MSG_ALL, pos.mangle_x);
-	WriteAngle (MSG_ALL, pos.mangle_y);
-	WriteAngle (MSG_ALL, pos.mangle_z);
-	
-	other = find (world, classname, "player");
-	while (other != world)
-	{
-		other.takedamage = DAMAGE_NO;
-		other.solid = SOLID_NOT;
-		other.movetype = MOVETYPE_NONE;
-		other.modelindex = 0;
-		other.effects = 0;
-		// Take the player to intermission spot so that server
-		// sends all the entities seen from intermission spot!
-		setorigin (other, pos.origin);
-		other = find (other, classname, "player");
-	}       
+    
 
 };
 
 
-void() changelevel_touch =
-{
+void() changelevel_touch = {
 	local entity    pos;
 
 	if (other.classname != "player")
 		return;
 
-// if "noexit" is set, blow up the player trying to leave
-//ZOID, 12-13-96, noexit isn't supported in QW.  Overload samelevel
-//      if ((cvar("noexit") == 1) || ((cvar("noexit") == 2) && (mapname != "start")))
-	if ((cvar("samelevel") == 2) || ((cvar("samelevel") == 3) && (mapname != "start")))
-	{
-		T_Damage (other, self, self, 50000);
-		return;
-	}
-
-	if (coop || deathmatch)
-	{
-		bprint (PRINT_MEDIUM, other.netname);
-		bprint (PRINT_MEDIUM," was first at end\n");
-		other.frags = other.frags + 5;
-	}
-
 	nextmap = self.map;
 
 	SUB_UseTargets ();
 
-	if ( (self.spawnflags & 1) && (deathmatch == 0) )
-	{	// NO_INTERMISSION
-		GotoNextMap();
-		return;
-	}
-
-	self.touch = SUB_Null;
-
-// we can't move people right now, because touch functions are called
-// in the middle of C movement code, so set a think time to do it
-	self.think = execute_changelevel;
-	self.nextthink = time + 0.1;
+	GotoNextMap();
 };
 
 /*QUAKED trigger_changelevel (0.5 0.5 0.5) ? NO_INTERMISSION
@@ -411,38 +277,33 @@ void() set_suicide_frame;
 // called by ClientKill and DeadThink
 void() respawn =
 {
-	if (coop)
-	{
-		// make a copy of the dead body for appearances sake
-		CopyToBodyQue (self);
-		// get the spawn parms as they were at level start
-		// setspawnparms (self); David 09-03-2016 Issue #3
-		SetNewParms ();
-		
-		// mighty hack alert!
-		// frags should not reset to level start amount
-		// this is the easiest way to do that
-		parm11 = self.frags;
-		
-		// respawn
-		PutClientInServer ();
-	}
-	else if (deathmatch)
-	{
-		// make a copy of the dead body for appearances sake
-		CopyToBodyQue (self);
-		// set default spawn parms
-		SetNewParms ();
-		// respawn
-		PutClientInServer ();
-	}
-	else
-	{	// restart the entire server
-//		localcmd ("restart\n");
-		localcmd ("map ");
-		localcmd (mapname);
-		localcmd ("\n");
-	}
+	//dprint("[respawn] ...\n");
+
+	// make a copy of the dead body for appearances sake
+	CopyToBodyQue (self);
+
+	// get the spawn parms as they were at level start
+	// setspawnparms (self); David 09-03-2016 Issue #3
+	SetNewParms ();
+	
+	// mighty hack alert!
+	// frags should not reset to level start amount
+	// this is the easiest way to do that
+	parm11 = self.frags;
+
+	/*
+	dprint("parm1=");dprint(ftos(parm1));dprint("\n");
+	dprint("parm2=");dprint(ftos(parm2));dprint("\n");
+	dprint("parm3=");dprint(ftos(parm3));dprint("\n");
+	dprint("parm4=");dprint(ftos(parm4));dprint("\n");
+	dprint("parm5=");dprint(ftos(parm5));dprint("\n");
+	dprint("parm6=");dprint(ftos(parm6));dprint("\n");
+	dprint("parm7=");dprint(ftos(parm7));dprint("\n");
+	dprint("parm8=");dprint(ftos(parm8));dprint("\n");
+	*/
+	
+	// respawn
+	PutClientInServer ();
 };
 
 
@@ -664,6 +525,7 @@ void() PutClientInServer =
 	
 	W_SetCurrentAmmo ("PutClientInServer");
 
+
 	self.attack_finished = time +1;
 	self.th_pain = player_pain;
 	self.th_die = PlayerDie;
@@ -702,6 +564,13 @@ void() PutClientInServer =
 
 	//Tei clean the zone from foes before the player spawn
 	ClearLandingZone(self.origin,300);	
+
+	if(self.book_level>0){
+		self.book_level = 0;
+		centerprint(self, "Your magic book level restart to zero");
+	}
+
+	GLOBAL_MISSION_STAGE = GLOBAL_MISSION_STAGE | self.mission_stage;
 };
 
 
@@ -1098,16 +967,15 @@ void() PlayerPreThink =
 	local   float   mspeed, aspeed;
 	local   float   r;
 
-	if (intermission_running)
-	{
+	if (intermission_running){
 		IntermissionThink ();   // otherwise a button could be missed between
-		return;                                 // the think tics
+		return;     // the think tics
 	}
 
 	if (self.view_ofs == '0 0 0')
 		return;         // intermission or finale
 
-	makevectors (self.v_angle);             // is this still used
+	makevectors (self.v_angle);             // is this still used?
 
 	//Clear deathtype in the prethink. will be set for something if we die
     self.deathtype = "";
@@ -1136,30 +1004,48 @@ void() PlayerPreThink =
 	}
 
 	// Tei Autokick	
-	if(time > self.attack_finished){
-		vector source = self.origin + '0 0 16';
-		traceline (source, source + v_forward*84, FALSE, self);
+	if(!PlayerHasShield(self)){
+		if(time > self.attack_finished){
+			vector source = self.origin + '0 0 16';
+			traceline (source, source + v_forward*84, FALSE, self);
 
-		if (trace_fraction != 1.0 && trace_ent.takedamage ){
-			self.weapon = IT_AXE;
-			self.currentammo = 0;
-			self.weaponmodel = "progs/v_axe.mdl";	
-			RandomAxeAttack ();
-		}else{
-			self.weapon = IT_SHOTGUN;
-			//self.currentammo = 0;
-			//self.weaponmodel = "progs/v_nail2.mdl";			
+			//Theres somethign to hit and is not another player (No friendly damage in coop!)
+			if (trace_fraction != 1.0 && trace_ent.takedamage && trace_ent.classname != "player"){
+				self.weapon = IT_AXE;
+				self.currentammo = 0;
+				self.weaponmodel = "progs/v_axe.mdl";	
+				RandomAxeAttack ();
+			}else{
+				self.weapon = IT_SHOTGUN;
+			}
 		}
 	}
 	// /Tei Autokick
-
+	
 	if (self.flags & FL_ONGROUND){
 		self.boots_onground = TRUE;
 	}
 
-	//if(self.boots_ammo>0){
-	//	self.boots_ammo = self.boots_ammo - 1;
-	//}
+	//Shield visible when having it
+	if(self.armorvalue>0){
+		self.effects = self.effects | EF_BLUE;
+	}else{
+		if(self.effects & EF_BLUE){
+			self.effects = self.effects - EF_BLUE;
+		}
+	}
+
+
+	float len;
+
+	if(self.talkingtome ){
+		len = vlen(self.origin - self.talkingtome.origin);
+
+		if(len>50){
+			self.talkingtome = 0;
+			centerprint(self,"");//clear message
+		}
+	}
 
 };
 	
@@ -1362,6 +1248,8 @@ void() PlayerPostThink =
 	if (self.deadflag)
 		return;
 
+	//centerprint(self, "hip");
+
 	// check to see if player landed and play landing sound 
 	if ((self.jump_flag < -300) && (self.flags & FL_ONGROUND) ){
 		if (self.watertype == CONTENT_WATER)
@@ -1379,6 +1267,16 @@ void() PlayerPostThink =
 
 	CheckPowerups ();
 	W_WeaponFrame ();
+
+
+		//Shield visible when having it
+		if(self.armorvalue>0){
+			self.effects = self.effects | EF_BLUE;
+		}else{
+			if(self.effects & EF_BLUE){
+				self.effects = self.effects - EF_BLUE;
+			}
+		}
 };
 
 
@@ -1406,9 +1304,10 @@ void() ClientConnect =
 	local string the_map;
 	the_map = infokey(world, "map");
 
+	/*
 	dprint("The map:");
 	dprint(the_map);
-	dprint("\n");
+	dprint("\n");*/
 
 	stuffcmd(self, "team coop\n");
 
@@ -1436,10 +1335,7 @@ void() ClientConnect =
 		GotoNextMap ();
 
 	//self.mapshowtime = time + 3;//Tei: show map for 3 seconds
-
-
-	dprint("Spawn in.. \n");
-
+	//dprint("Spawn in.. \n");
 };
 
 
@@ -1590,9 +1486,6 @@ void(entity targ, entity attacker) ClientObituary =
 
 		// killed by a montser?
 		if (attacker.flags & FL_MONSTER){
-			dprint("attacker is monster [");
-			dprint(attacker.classname);
-			dprint("]\n");
 
 			bprint (PRINT_MEDIUM,targ.netname);
 

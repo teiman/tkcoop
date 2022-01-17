@@ -6,6 +6,12 @@ SHAMBLER
 ==============================================================================
 */
 
+void() ShalMissile;
+
+
+
+
+
 $cd id1/models/shams
 $origin 0 0 24
 $base base		
@@ -35,6 +41,84 @@ $frame pain1 pain2 pain3 pain4 pain5 pain6
 
 $frame death1 death2 death3 death4 death5 death6 
 $frame death7 death8 death9 death10 death11
+
+
+void() ShamMissileTouch;
+void() ShamHome;
+void() ShamMissile =
+{
+	local	entity 	missile;
+	local	vector	dir;
+	local	float	dist, flytime;
+
+	dir = normalize((self.enemy.origin + '0 0 10') - self.origin);
+	dist = vlen (self.enemy.origin - self.origin);
+	flytime = dist * 0.002;
+	if (flytime < 0.1)
+		flytime = 0.1;
+
+	muzzleflash();
+	sound (self, CHAN_WEAPON, "shalrath/attack2.wav", 1, ATTN_NORM);
+
+	missile = spawn ();
+	missile.owner = self;
+
+	missile.solid = SOLID_BBOX;
+	missile.movetype = MOVETYPE_FLYMISSILE;
+	setmodel (missile, "progs/v_spike.mdl");
+
+	setsize (missile, '0 0 0', '0 0 0');		
+
+	missile.origin = self.origin + '0 0 50' + '0 0 20'*random();
+	setorigin(missile, missile.origin);//unnecesary?
+
+	missile.velocity = dir * 400;
+	missile.avelocity = '300 300 300';
+	missile.nextthink = flytime + time;
+	missile.think = ShamHome;
+	missile.enemy = self.enemy;
+	missile.touch = ShamMissileTouch;
+};
+
+void() ShamHome =
+{
+	local vector	dir, vtemp;
+	vtemp = self.enemy.origin + '0 0 10';
+
+	if (self.enemy.health < 1){
+		remove(self);
+		return;
+	}
+
+	dir = normalize(vtemp - self.origin);
+
+	self.velocity = dir * 250;
+
+	self.nextthink = time + 0.2;
+	self.think = ShamHome;	
+};
+
+void() ShamMissileTouch =
+{
+	if (other == self.owner)
+		return;		// don't explode on owner
+
+	if (other.classname == "monster_zombie")
+		T_Damage (other, self, self, 110);	
+
+	T_RadiusDamage (self, self.owner, 40, world, "shalrath");
+	sound (self, CHAN_WEAPON, "weapons/r_exp3.wav", 1, ATTN_NORM);
+
+	WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
+	WriteByte (MSG_BROADCAST, TE_EXPLOSION);
+	WriteCoord (MSG_BROADCAST, self.origin_x);
+	WriteCoord (MSG_BROADCAST, self.origin_y);
+	WriteCoord (MSG_BROADCAST, self.origin_z);
+	multicast (self.origin, MULTICAST_PHS);	
+
+	remove (self);
+};
+
 
 void() sham_stand1	=[	$stand1,	sham_stand2	] {ai_stand();};
 void() sham_stand2	=[	$stand2,	sham_stand3	] {ai_stand();};
@@ -190,8 +274,7 @@ void() sham_melee =
 
 //============================================================================
 
-void() CastLightning =
-{
+void() CastLightning = {
 	local	vector	org, dir;
 	
 	muzzleflash();
@@ -215,56 +298,63 @@ void() CastLightning =
 	WriteCoord (MSG_BROADCAST, trace_endpos_y);
 	WriteCoord (MSG_BROADCAST, trace_endpos_z);
 
-	LightningDamage (org, trace_endpos, self, 10);
+	LightningDamage (org, trace_endpos, self, 10);	
+};
 
+void() sham_magic1     =[      $magic1,       sham_magic2    ] {
+	ai_face();
+	sound (self, CHAN_WEAPON, "shambler/sattck1.wav", 1, ATTN_NORM);
 	
 };
+void() sham_magic2     =[      $magic2,       sham_magic3    ] {
+	ai_face();
+};
+void() sham_magic3     =[      $magic3,       sham_magic4    ] {
+		ai_face();
+		self.nextthink = self.nextthink + 0.2;
+	local entity o;
 
-void() sham_magic1     =[      $magic1,       sham_magic2    ] {ai_face();
-	sound (self, CHAN_WEAPON, "shambler/sattck1.wav", 1, ATTN_NORM);
+	muzzleflash();
+	ai_face();
+	self.owner = spawn();
+	o = self.owner;
+	setmodel (o, "progs/s_light.mdl");
+	setorigin (o, self.origin);
+	o.angles = self.angles;
+	o.nextthink = time + 0.7;
+	o.think = SUB_Remove;
+	
+	if(self.is_boss){
+		ShamMissile();
+	}
 };
-void() sham_magic2     =[      $magic2,       sham_magic3    ] {ai_face();};
-void() sham_magic3     =[      $magic3,       sham_magic4    ] {ai_face();self.nextthink = self.nextthink + 0.2;
-local entity o;
 
-muzzleflash();
-ai_face();
-self.owner = spawn();
-o = self.owner;
-setmodel (o, "progs/s_light.mdl");
-setorigin (o, self.origin);
-o.angles = self.angles;
-o.nextthink = time + 0.7;
-o.think = SUB_Remove;
+void() sham_magic4     =[      $magic4,       sham_magic5    ] {
+	muzzleflash();
+	self.owner.frame = 1;
+
+	if(self.is_boss){
+		ShamMissile();
+	}
 };
-void() sham_magic4     =[      $magic4,       sham_magic5    ]
-{
-muzzleflash();
-self.owner.frame = 1;
-};
-void() sham_magic5     =[      $magic5,       sham_magic6    ]
-{
-muzzleflash();
-self.owner.frame = 2;
+void() sham_magic5     =[      $magic5,       sham_magic6    ] {
+	muzzleflash();
+	self.owner.frame = 2;
+
+	if(self.is_boss){
+		ShamMissile();
+	}
 };
 void() sham_magic6     =[      $magic6,       sham_magic9    ]
 {
-remove (self.owner);
-CastLightning();
-sound (self, CHAN_WEAPON, "shambler/sboom.wav", 1, ATTN_NORM);
-};
-void() sham_magic9     =[      $magic9,       sham_magic10   ]
-{CastLightning();};
-void() sham_magic10    =[      $magic10,      sham_magic11   ]
-{CastLightning();};
-void() sham_magic11    =[      $magic11,      sham_magic12   ]
-{
-if (skill == 3)
+	remove (self.owner);
 	CastLightning();
+	sound (self, CHAN_WEAPON, "shambler/sboom.wav", 1, ATTN_NORM);
 };
+void() sham_magic9     =[      $magic9,       sham_magic10   ] {CastLightning();};
+void() sham_magic10    =[      $magic10,      sham_magic11   ] {CastLightning();};
+void() sham_magic11    =[      $magic11,      sham_magic12   ] {};
 void() sham_magic12    =[      $magic12,      sham_run1	   ] {};
-
-
 
 void() sham_pain1       =[      $pain1, sham_pain2      ] {};
 void() sham_pain2       =[      $pain2, sham_pain3      ] {};
@@ -305,6 +395,9 @@ void() sham_death9      =[      $death9,       sham_death10    ] {};
 void() sham_death10     =[      $death10,      sham_death11    ] {};
 void() sham_death11     =[      $death11,      sham_death11    ] {};
 
+void(entity item) DropHasGoldKey;
+entity(vector org) MakeDropableItem;
+
 void() sham_die =
 {
 // check for gib
@@ -318,23 +411,33 @@ void() sham_die =
 		return;
 	}
 
-// regular death
+	//Random posibilities that it drop a key
+	if(random()<0.5){
+		local entity key = MakeDropableItem(self.origin);
+		DropHasGoldKey(key);
+	}
+
+	// regular death
 	sound (self, CHAN_VOICE, "shambler/sdeath.wav", 1, ATTN_NORM);
 	sham_death1 ();
 };
 
 //============================================================================
 
+void() monster_supershambler;
 
 /*QUAKED monster_shambler (1 0 0) (-32 -32 -24) (32 32 64) Ambush
 */
 void() monster_shambler =
 {
-	if (deathmatch)
-	{
-		remove(self);
+	self.classname = "monster_shambler";
+
+	if(mapname == "tk_map"){
+		dprint("Typhoon awaits a sacrifice\n");
+		monster_supershambler();
 		return;
 	}
+
 	precache_model ("progs/shambler.mdl");
 	precache_model ("progs/s_light.mdl");
 	precache_model ("progs/h_shams.mdl");
@@ -364,8 +467,22 @@ void() monster_shambler =
 	self.th_melee = sham_melee;
 	self.th_missile = sham_magic1;
 	self.th_pain = sham_pain;
+
+	self.skin = random()*5;
 	
 	self.armorvalue = 300;
+	
+	if(random()<0.3 ){
+		//Turn this guy into a boss.
+		self.armorvalue = 600;
+		self.effects = self.effects | EF_RED;		
+		
+		self.is_boss = TRUE;
+		self.skin = 3;
+	}
+
+
+
 
 	walkmonster_start();
 };

@@ -276,8 +276,55 @@ void() HuntTarget =
 	SUB_AttackFinished (1);	// wait a while before first attack
 };
 
+void(vector org) SightSign = {
+    local entity t = spawn();
+    
+    t.think = SUB_Remove;    
+    t.nextthink = time + 0.8;
+    t.frame = 3;
+	t.solid = SOLID_NOT;
+    t.skin = SPR_VP_PARALLEL;
+    setmodel(t,"progs/fx.spr");
+	setorigin(t,org);	
+};
+
+void(vector org) SightSignBoss = {
+    local entity t = spawn();
+    
+    t.think = SUB_Remove;    
+    t.nextthink = time + 1.4;
+    t.frame = 4;
+	t.solid = SOLID_NOT;
+    t.skin = SPR_VP_PARALLEL;
+    setmodel(t,"progs/fx.spr");
+	setorigin(t,org);	
+};
+
 void() SightSound = {
 	local float	rsnd;
+
+	if(!self.is_boss){
+		SightSign(self.origin + '0 0 50');	
+	}else{
+		//Boss
+		SightSignBoss(self.origin + '0 0 50');	
+		
+		if (self.classname == "monster_enforcer") {
+			rsnd = rint(random() * 3);			
+			if (rsnd == 1)
+				sound (self, CHAN_VOICE, "horde1.wav", 1, ATTN_NORM);
+			else if (rsnd == 2)
+				sound (self, CHAN_VOICE, "horde2.wav", 1, ATTN_NORM);
+			else if (rsnd == 0)
+				sound (self, CHAN_VOICE, "horde3.wav", 1, ATTN_NORM);
+			else
+				sound (self, CHAN_VOICE, "horde4.wav", 1, ATTN_NORM);
+		}else{
+			sound (self, CHAN_VOICE, "boss1/sight1.wav", 1, ATTN_NORM);		
+		}
+
+		return;
+	}	
 
 	if (self.classname == "monster_ogre")	
 		sound (self, CHAN_VOICE, "ogre/ogwake.wav", 1, ATTN_NORM);
@@ -366,9 +413,7 @@ float() FindTarget =
 		client = sight_entity;
 		if (client.enemy == self.enemy)
 			return FALSE; // FIXME: should this be false?
-	}
-	else
-	{
+	}else	{
 		client = checkclient ();
 		if (!client)
 			return FALSE;	// current check entity isn't in PVS
@@ -389,8 +434,7 @@ float() FindTarget =
 	if (!visible (client))
 		return FALSE;
 
-	if (r == RANGE_NEAR)
-	{
+	if (r == RANGE_NEAR){
 		if (client.show_hostile < time && !infront (client))
 			return FALSE;
 	}
@@ -404,11 +448,9 @@ float() FindTarget =
 	// got one
 	//
 	self.enemy = client;
-	if (self.enemy.classname != "player")
-	{
+	if (self.enemy.classname != "player") {
 		self.enemy = self.enemy.enemy;
-		if (self.enemy.classname != "player")
-		{
+		if (self.enemy.classname != "player"){
 			self.enemy = world;
 			return FALSE;
 		}
@@ -460,10 +502,7 @@ ai_walk
 The monster is walking it's beat
 =============
 */
-void(float dist) ai_walk =
-{
-	local vector		mtemp;
-	
+void(float dist) ai_walk = {
 	movedist = dist;
 	
 	// check for noticing a player

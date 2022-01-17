@@ -240,7 +240,7 @@ float() SoldierCheckAttack =
 
 	targ = self.enemy;
 	
-// see if any entities are in the way of the shot
+	// see if any entities are in the way of the shot
 	spot1 = self.origin + self.view_ofs;
 	spot2 = targ.origin + targ.view_ofs;
 
@@ -250,10 +250,9 @@ float() SoldierCheckAttack =
 		return FALSE;			// sight line crossed contents
 
 	if (trace_ent != targ)
-		return FALSE;	// don't have a clear shot
-			
+		return FALSE;	// don't have a clear shot		
 	
-// missile attack
+	// missile attack
 	if (time < self.attack_finished)
 		return FALSE;
 		
@@ -269,8 +268,10 @@ float() SoldierCheckAttack =
 	else
 		chance = 0;
 
-	if (random () < chance)
-	{
+	if(!self.th_missile)
+		return FALSE;
+
+	if (random () < chance) {
 		self.th_missile ();
 		SUB_AttackFinished (1 + random());
 		if (random() < 0.3)

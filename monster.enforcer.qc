@@ -38,16 +38,24 @@ $frame paind9 paind10 paind11 paind12 paind13 paind14 paind15 paind16
 $frame paind17 paind18 paind19
 
 
-void() enforcer_fire =
-{
+void() enforcer_fire = {
 	local vector org;
+	local float laserspeed = 30;
 
 	MUZZLEFLASH(self.origin);
 	makevectors (self.angles);
 	
-	org = self.origin + v_forward * 30 + v_right * 8.5 + '0 0 16';
+	if(self.is_boss){
+		laserspeed = 100;
+	}
+
+	org = self.origin + v_forward * laserspeed + v_right * 8.5 + '0 0 16';
 
 	LaunchLaser(org, self.enemy.origin - self.origin);
+
+	if(self.is_boss){
+		self.effects = self.effects - EF_RED;
+	}
 };
 
 //============================================================================
@@ -81,9 +89,18 @@ void()	enf_walk15	=[	$walk15,	enf_walk16	] {ai_walk(4);};
 void()	enf_walk16	=[	$walk16,	enf_walk1	] {ai_walk(2);};
 
 void()	enf_run1	=[	$run1  ,	enf_run2	] {
-if (random() < 0.2)
-	sound (self, CHAN_VOICE, "enforcer/idle1.wav", 1, ATTN_IDLE);
-ai_run(18);};
+	if (random() < 0.2)
+		sound (self, CHAN_VOICE, "enforcer/idle1.wav", 1, ATTN_IDLE);
+	ai_run(18);
+};
+
+
+void() fade_redflash = {
+	if(self.effects & EF_RED){
+		self.effects = self.effects - EF_RED;
+	}
+};
+
 void()	enf_run2	=[	$run2  ,	enf_run3	] {ai_run(14);};
 void()	enf_run3	=[	$run3  ,	enf_run4	] {ai_run(7);};
 void()	enf_run4	=[	$run4  ,	enf_run5	] {ai_run(12);};
@@ -95,16 +112,16 @@ void()	enf_run8	=[	$run8  ,	enf_run1	] {ai_run(11);};
 void()	enf_atk1	=[	$attack1,	enf_atk2	] {ai_face();};
 void()	enf_atk2	=[	$attack2,	enf_atk3	] {ai_face();};
 void()	enf_atk3	=[	$attack3,	enf_atk4	] {ai_face();};
-void()	enf_atk4	=[	$attack4,	enf_atk5	] {ai_face();};
-void()	enf_atk5	=[	$attack5,	enf_atk6	] {ai_face();};
+void()	enf_atk4	=[	$attack4,	enf_atk5	] {ai_face();if(self.is_boss) enforcer_fire();};
+void()	enf_atk5	=[	$attack5,	enf_atk6	] {ai_face();fade_redflash();};
 void()	enf_atk6	=[	$attack6,	enf_atk7	] {enforcer_fire();};
 void()	enf_atk7	=[	$attack7,	enf_atk8	] {ai_face();};
-void()	enf_atk8	=[	$attack8,	enf_atk9	] {ai_face();};
-void()	enf_atk9	=[	$attack5,	enf_atk10	] {ai_face();};
+void()	enf_atk8	=[	$attack8,	enf_atk9	] {ai_face();if(self.is_boss) enforcer_fire();};
+void()	enf_atk9	=[	$attack5,	enf_atk10	] {ai_face();fade_redflash();};
 void()	enf_atk10	=[	$attack6,	enf_atk11	] {enforcer_fire();};
 void()	enf_atk11	=[	$attack7,	enf_atk12	] {ai_face();};
-void()	enf_atk12	=[	$attack8,	enf_atk13	] {ai_face();};
-void()	enf_atk13	=[	$attack9,	enf_atk14	] {ai_face();};
+void()	enf_atk12	=[	$attack8,	enf_atk13	] {ai_face();if(self.is_boss) enforcer_fire();};
+void()	enf_atk13	=[	$attack9,	enf_atk14	] {ai_face();fade_redflash();};
 void()	enf_atk14	=[	$attack10,	enf_run1	] {
 	ai_face();
 	SUB_CheckRefire (enf_atk1);
@@ -223,9 +240,8 @@ void()	enf_fdie10	=[	$fdeath10,	enf_fdie11	] {};
 void()	enf_fdie11	=[	$fdeath11,	enf_fdie11	] {};
 
 
-void() enf_die =
-{
-// check for gib
+void() enf_die = {
+	// check for gib
 	if (self.health < -35)
 	{
 		sound (self, CHAN_VOICE, "player/udeath.wav", 1, ATTN_NORM);
@@ -236,7 +252,7 @@ void() enf_die =
 		return;
 	}
 
-// regular death
+	// regular death
 	sound (self, CHAN_VOICE, "enforcer/death1.wav", 1, ATTN_NORM);
 	if (random() > 0.5)
 		enf_die1 ();
@@ -245,28 +261,19 @@ void() enf_die =
 };
 
 
-/*QUAKED monster_enforcer (1 0 0) (-16 -16 -24) (16 16 40) Ambush
 
-*/
-void() monster_enforcer = {
-	precache_model2 ("progs/enforcer.mdl");
-	precache_model2 ("progs/h_mega.mdl");
-	precache_model2 ("progs/laser.mdl");
+/*QUAKED monster_enforcer (1 0 0) (-16 -16 -24) (16 16 40) Ambush */
 
-	precache_sound2 ("enforcer/death1.wav");
-	precache_sound2 ("enforcer/enfire.wav");
-	precache_sound2 ("enforcer/enfstop.wav");
-	precache_sound2 ("enforcer/idle1.wav");
-	precache_sound2 ("enforcer/pain1.wav");
-	precache_sound2 ("enforcer/pain2.wav");
-	precache_sound2 ("enforcer/sight1.wav");
-	precache_sound2 ("enforcer/sight2.wav");
-	precache_sound2 ("enforcer/sight3.wav");
-	precache_sound2 ("enforcer/sight4.wav");
-	
+void() monster_enforcer_start = {
+	self.classname = "monster_enforcer";
+
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_STEP;
 	self.skin = floor(random()*5);//Tei, experiment
+
+	if(self.skin == 1){ //1 reserved for bosses
+		self.skin = 0;
+	}
 	
 	setmodel (self, "progs/enforcer.mdl");
 
@@ -282,5 +289,20 @@ void() monster_enforcer = {
 
 	self.armorvalue = 100;
 
+	if(random()<0.3){
+		//Turn this guy into a boss.
+		self.armorvalue = 300;
+		//self.effects = self.effects | EF_RED;
+		//self.effects = self.effects | EF_DIMLIGHT;
+		
+		self.is_boss = TRUE;
+		self.skin = 1;
+	}
+
 	walkmonster_start();
+};
+
+void() monster_enforcer = {
+	monster_enforcer_precache();
+	monster_enforcer_start();
 };

@@ -165,8 +165,7 @@ void()	army_painc11=[	$painc11,	army_painc12] {ai_painforward(6);};
 void()	army_painc12=[	$painc12,	army_painc13] {ai_painforward(8);};
 void()	army_painc13=[	$painc13,	army_run1] {};
 
-void(entity attacker, float damage)	army_pain =
-{
+void(entity attacker, float damage)	army_pain = {
 	local float rs;
 	
 	if (self.pain_finished > time)
@@ -205,8 +204,7 @@ void(entity attacker, float damage)	army_pain =
 };
 
 
-void() army_fire =
-{
+void() army_fire = {
 	local	vector	dir;
 	local	entity	en;
 	
@@ -214,7 +212,7 @@ void() army_fire =
 	
 	sound (self, CHAN_WEAPON, "soldier/sattck1.wav", 1, ATTN_NORM);	
 
-// fire somewhat behind the player, so a dodging player is harder to hit
+	// fire somewhat behind the player, so a dodging player is harder to hit
 	en = self.enemy;
 	
 	dir = en.origin - en.velocity*0.2;
@@ -226,6 +224,7 @@ void() army_fire =
 
 
 void()	army_die1	=[	$death1,	army_die2	] {
+	self.solid = SOLID_NOT;
 	ThrowWeapon ("progs/soldier_weapon.mdl", self.health, '-21 -7 -5', '8 0 3');
 };
 void()	army_die2	=[	$death2,	army_die3	] {};
@@ -242,11 +241,21 @@ void()	army_die10	=[	$death10,	army_die10	] {};
 
 
 void()	army_cdie1	=[	$deathc1,	army_cdie2	] {
+	self.solid = SOLID_NOT;
 	ThrowWeapon ("progs/soldier_weapon.mdl", self.health, '-21 -7 -5', '8 0 3');
 };
-void()	army_cdie2	=[	$deathc2,	army_cdie3	] {ai_back(5);};
-void()	army_cdie3	=[	$deathc3,	army_cdie4	]
-{self.solid = SOLID_NOT;self.ammo_shells = 5;DropBackpack();ai_back(4);};
+void()	army_cdie2	=[	$deathc2,	army_cdie3	] {ai_back(5);
+	if(random()<0.3){
+		ThrowGib ("progs/eye.mdl", self.health);
+		ThrowGib ("progs/eye.mdl", self.health);
+	}
+};
+void()	army_cdie3	=[	$deathc3,	army_cdie4	] {
+	self.solid = SOLID_NOT;
+	self.ammo_shells = 5;
+	DropBackpack();
+	ai_back(4);
+};
 void()	army_cdie4	=[	$deathc4,	army_cdie5	] {ai_back(13);};
 void()	army_cdie5	=[	$deathc5,	army_cdie6	] {ai_back(3);};
 void()	army_cdie6	=[	$deathc6,	army_cdie7	] {ai_back(4);};
@@ -256,17 +265,34 @@ void()	army_cdie9	=[	$deathc9,	army_cdie10	] {};
 void()	army_cdie10	=[	$deathc10,	army_cdie11	] {};
 void()	army_cdie11	=[	$deathc11,	army_cdie11	] {};
 
+void(vector location) TempBloodSplat = {
+	local entity temp;
+
+	temp = spawn();
+
+	setorigin(temp,location);
+	setmodel(temp,"progs/s_explod.spr");
+
+	temp.think = SUB_Remove;
+	temp.nextthink = time + 0.3;
+};
+
 void()	army_teledie1	=[	$death1,	army_teledie2	] {
 	self.solid = SOLID_NOT;
-	ThrowWeapon ("progs/soldier_weapon.mdl", self.health, '-21 -7 -5', '8 0 3');
+	ThrowWeapon ("progs/soldier_weapon.mdl", self.health*0.5, '-21 -7 -5', '8 0 3');
 };
 void()	army_teledie2	=[	$death2,	army_teledie2	] {
 	self.ammo_shells = 5;
 	DropBackpack();
+	TempBloodSplat(self.origin);
 	sound (self, CHAN_VOICE, "player/udeath.wav", 1, ATTN_NORM);
 	ThrowGib ("progs/gib1.mdl", self.health);
 	ThrowGib ("progs/gib2.mdl", self.health);
 	ThrowGib ("progs/gib3.mdl", self.health);
+
+	ThrowGib ("progs/eye.mdl", self.health);
+	ThrowGib ("progs/eye.mdl", self.health);
+
 	ThrowHead ("progs/h_guard.mdl", self.health);
 };
 
@@ -314,27 +340,11 @@ void() army_die = {
 };
 
 
-/*QUAKED monster_army (1 0 0) (-16 -16 -24) (16 16 40) Ambush
-*/
-void() monster_army = {	
-	
-	precache_model ("progs/soldier.mdl");
-	precache_model ("progs/soldier_weapon.mdl");
-	precache_model ("progs/h_guard.mdl");
-	precache_model ("progs/gib1.mdl");
-	precache_model ("progs/gib2.mdl");
-	precache_model ("progs/gib3.mdl");
 
-	precache_sound ("soldier/death1.wav");
-	precache_sound ("soldier/idle.wav");
-	precache_sound ("soldier/pain1.wav");
-	precache_sound ("soldier/pain2.wav");
-	precache_sound ("soldier/sattck1.wav");
-	precache_sound ("soldier/sight1.wav");
+void() monster_army_start = {
+	self.classname = "monster_army";
 
-	precache_sound ("player/udeath.wav");		// gib death
-
-	self.skin = floor(random()*5);//Tei, experiment
+	self.skin = rint(random()*5);//Tei, experiment
 
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_STEP;
@@ -350,7 +360,17 @@ void() monster_army = {
 	self.th_pain = army_pain;
 	self.th_die = army_die;
 
-	//self.armorvalue = 20;
+	//self.alpha = 0.5;
+	self.effects = self.effects | EF_BOSS;		
+    
 
 	walkmonster_start ();
+};
+
+
+/*QUAKED monster_army (1 0 0) (-16 -16 -24) (16 16 40) Ambush
+*/
+void() monster_army = {		
+	monster_army_precache(); //unnecesary, always called 
+	monster_army_start();
 };

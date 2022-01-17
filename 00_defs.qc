@@ -43,7 +43,22 @@ float           killed_monsters;        // number of monsters killed
 
 // spawnparms are used to encode information about clients across server
 // level changes
-float           parm1, parm2, parm3, parm4, parm5, parm6, parm7, parm8, parm9, parm10, parm11, parm12, parm13, parm14, parm15, parm16;
+float           parm1, // self.items
+				parm2, // self.health;
+				parm3,  //  self.armorvalue;
+				parm4,  // self.ammo_shells;
+				parm5,  // self.ammo_nails;
+				parm6,  // self.ammo_rockets;
+				parm7,  // self.ammo_cells;
+				parm8,  // self.weapon;
+				parm9,  // self.armortype * 100;
+				parm10,  // autorecord?
+				parm11, //frags
+				parm12,  // 
+				parm13,  // 
+				parm14,  // 
+				parm15,  // 
+				parm16; // 
 
 //
 // global variables set by built in functions
@@ -386,16 +401,26 @@ float   UPDATE_TEMP             = 3;
 
 // entity effects
 
-//float EF_BRIGHTFIELD  = 1;
-//float EF_MUZZLEFLASH  = 2;
-float   EF_BRIGHTLIGHT  = 4;
-float   EF_DIMLIGHT     = 8;
-float   EF_FLAG1                = 16;
-float   EF_FLAG2                = 32;
+float EF_BRIGHTFIELD       = 1; //does not appar to anything
+float EF_GREEN            = 2;     // Green shield + Green aura
+float EF_BRIGHTLIGHT  = 4; // huge bright aura 
+float EF_DIMLIGHT     = 8; // small bright aura 
+float EF_FLAG1                = 16; // appears to do nothing
+float EF_FLAG2                = 32; // appears to do nothing (not tested)
+
 // GLQuakeWorld Stuff
-float 	EF_BLUE		=	64;	// Blue Globe effect for Quad
-float	EF_RED		=	128;	// Red Globe effect for Pentagram
-float   EF_GREEN = 256;//??? 
+float EF_BLUE		= 64;	// Blue Globe effect for Quad
+float EF_RED		= 128;	// Red Globe effect for Pentagram
+float EF_BOSS 		= 512;	// experiment
+float EF_SMALLFX  = 1024;	// make other effect subtle 
+
+
+
+
+
+
+
+
 
 // messages
 float   MSG_BROADCAST   = 0;            // unreliable to all
@@ -701,6 +726,7 @@ void(string var, string val) cvar_set = #72;    // sets cvar.value
 
 void(entity client, string s) centerprint = #73;        // sprint, but in middle
 
+
 void(vector pos, string samp, float vol, float atten) ambientsound = #74;
 
 string(string s) precache_model2        = #75;          // registered version only
@@ -721,6 +747,9 @@ string(entity e, string key) infokey    = #80;  // get a key value (world = serv
 float(string s) stof                            = #81;          // convert string to float
 void(vector where, float set) multicast = #82;  // sends the temp message to a set
 												// of clients, possibly in PVS or PHS
+
+__variant (string s1,string s2, string s3) find_function = #83; //Tei search function with name s1+s2+s3 ,  "soldier_walk",ftos(1), "" => return function "soldier_walk1"
+void(entity client, string s, string s2) centerprint2 = #84;        // Tei named centerprint
 
 //============================================================================
 
@@ -766,5 +795,92 @@ float(entity targ, entity inflictor) CanDamage;
 
 .float boots_onground;//Tei dbljump
 .float boots_ammo;//Tei dbljump
+
+.float is_boss;  //Tei: difficult enemies that behave very differently than the others 
+
+
+//Testing stuff 
+//.float alpha;	/* The transparency of the entity. 1 means opaque, 0.0001 means virtually invisible. 0 is remapped to 1, for compatibility. */
+
+
+float SPR_VP_PARALLEL_UPRIGHT		=0;
+float SPR_FACING_UPRIGHT			=1;
+float SPR_VP_PARALLEL				=2;
+float SPR_ORIENTED				=3;
+float SPR_VP_PARALLEL_ORIENTED	=4;
+float SPR_TEI_TYPEHACK			=5;
+
+
+
+//Tei.  using ChaseView 
+.vector camview;
+
+//Tei.  using self shield
+.entity shield_entity;
+
+//Tei. for use with npc
+.float dialog_stage;
+
+//Tei for use with npc, timer
+.float dialog_cooldown;
+
+//Tei for talking 
+.void() th_talk;
+
+//Tei for talking
+.entity talkingtome;
+
+//Tei mission control 
+.float mission_stage;
+
+float EPISODE1_COMPLETE = 1;
+float EPISODE2_COMPLETE = 2;
+float EPISODE3_COMPLETE = 4;
+float EPISODE4_COMPLETE = 8;
+
+string MISSION1 = "e1m3";
+string MISSION2 = "e3m5";
+string MISSION3 = "e4m4";
+string MISSION4 = "tk_map";
+
+
+int(entity player) PlayerHasShield;
+
+
+string nextmap_selected;
+
+float PLAYERSKIN_RANGER = 0;
+float PLAYERSKIN_CAPTAIN = 1;
+float PLAYERSKIN_SARGE = 2;
+float PLAYERSKIN_ENFORCER1 = 3;
+float PLAYERSKIN_ENFORCER2 = 4;
+float PLAYERSKIN_GUARD = 6;
+float PLAYERSKIN_BLUESPECIAL = 7;
+float PLAYERSKIN_ORANGE = 8;//and 9
+float PLAYERSKIN_NINJA = 10;
+float PLAYERSKIN_OFFICER = 11;
+float PLAYERSKIN_GUARDBOSS = 5;//12
+float PLAYERSKIN_GOLEM = 13;
+
+
+//Tei permanently upgrade damage, resets after dying 
+.float book_level; 
+
+/** --------------------- Global variables -------------------  */
+
+
+var float GLOBAL_MISSION_STAGE = 0;
+
+
+
+
+
+
+
+
+
+
+
+
 
 

@@ -412,13 +412,8 @@ void() ogre_melee =
 /*QUAKED monster_ogre (1 0 0) (-32 -32 -24) (32 32 64) Ambush
 
 */
-void() monster_ogre =
-{
-	if (deathmatch)
-	{
-		remove(self);
-		return;
-	}
+
+void() monster_ogre_precache = {
 	precache_model ("progs/ogre.mdl");
 	precache_model ("progs/h_ogre.mdl");
 	precache_model ("progs/grenade.mdl");
@@ -430,7 +425,11 @@ void() monster_ogre =
 	precache_sound ("ogre/ogpain1.wav");
 	precache_sound ("ogre/ogsawatk.wav");
 	precache_sound ("ogre/ogwake.wav");
+};
 
+void() monster_ogre_start = {
+	
+	self.classname = "monster_ogre";
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_STEP;
 
@@ -448,6 +447,10 @@ void() monster_ogre =
 	self.th_pain = ogre_pain;
 	
 	walkmonster_start();
+};
+
+void() monster_ogre = {
+	DelaySpawn();
 };
 
 void() monster_ogre_marksman =

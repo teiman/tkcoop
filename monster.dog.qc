@@ -332,11 +332,7 @@ float()	DogCheckAttack =
 */
 void() monster_dog =
 {
-	if (deathmatch)
-	{
-		remove(self);
-		return;
-	}
+	self.classname = "monster_dog";
 
 
 	/*
