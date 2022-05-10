@@ -96,6 +96,46 @@ var float  s1_inuse = FALSE;
 var float  s2_inuse = FALSE;
 
 
+void() BossSpriteThink = {
+
+    switch(self.cnt){
+        case 0:
+            self.frame = 2;
+            break;
+        case 1:
+            self.frame = 1;
+            break;
+        case 2:
+            self.frame = 0;
+            break;
+        case 3:
+            self.think = SUB_Remove;
+            break;        
+    }
+
+    self.cnt = self.cnt + 1;
+    self.nextthink = time + 0.1;
+};
+
+
+
+void(vector org) BossFace = {
+    local entity t = spawn();
+
+    dprint("[BossFace] heeeeeeeeeeeeeeeeeeey!\n");
+    
+    t.think = SUB_Remove;    
+    t.nextthink = time + 1.4;
+    t.frame = 1;
+	t.solid = SOLID_NOT;
+    t.skin = SPR_VP_PARALLEL;
+    setmodel(t,"progs/typhoon.spr");
+	setorigin(t,org);	
+    t.cnt = 0;
+    t.think = BossSpriteThink;
+    t.nextthink = time + 0.1;
+};
+
 
 /*--------------------------------------*/
 
@@ -1055,6 +1095,8 @@ void() supersham_magic3     =[      $magic3,       supersham_magic4    ] {
 
 	local entity o;
 
+    BossFace(self.origin +'0 0 100');
+
 	muzzleflash();
 	ai_face();
 	self.owner = spawn();
@@ -1210,6 +1252,8 @@ void() monster_supershambler_precache = {
     precache_model ("progs/orb.spr");//for the ball summoning     
 
     precache_model ("progs/shamhand.mdl");
+
+    precache_model ("progs/typhoon.spr");
 };
 
 
